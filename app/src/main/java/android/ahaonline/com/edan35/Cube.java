@@ -38,7 +38,6 @@ public class Cube {
 
 
 
-
     static float cubeCoords[] = {   // in counterclockwise order:
             -1.0f,-1.0f,-1.0f, // triangle 1 : begin
             -1.0f,-1.0f, 1.0f,
@@ -128,26 +127,9 @@ public class Cube {
         vertexBuffer = new VertexBuffer(cubeCoords).getVertexBuffer();
         vertexBufferColor = new VertexBuffer(color).getVertexBuffer();
 
-        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER,
-                vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
-                fragmentShaderCode);
 
         mProgram = ShaderProgram.buildProgram(vertexShaderCode, fragmentShaderCode);
 
-        /*
-        // create empty OpenGL ES Program
-        mProgram = GLES20.glCreateProgram();
-
-        // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, vertexShader);
-
-        // add the fragment shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader);
-
-        // creates OpenGL ES program executables
-        GLES20.glLinkProgram(mProgram);
-        */
     }
 
     public void draw(float[] mvpMatrix) {

@@ -1,6 +1,7 @@
 package android.ahaonline.com.edan35;
 
 import android.ahaonline.com.edan35.data.VertexBuffer;
+import android.ahaonline.com.edan35.programs.ShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
 
@@ -51,22 +52,8 @@ public class Triangle {
 
         vertexBuffer = new VertexBuffer(triangleCoords).getVertexBuffer();
 
-        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER,
-                vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
-                fragmentShaderCode);
 
-        // create empty OpenGL ES Program
-        mProgram = GLES20.glCreateProgram();
-
-        // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, vertexShader);
-
-        // add the fragment shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader);
-
-        // creates OpenGL ES program executables
-        GLES20.glLinkProgram(mProgram);
+        mProgram = ShaderProgram.buildProgram(vertexShaderCode, fragmentShaderCode);
     }
 
     public void draw(float[] mvpMatrix) {
