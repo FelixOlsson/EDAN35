@@ -1,9 +1,9 @@
-uniform mat4 uMVPMatrix;
-attribute vec4 vPosition;
-attribute vec4 aColor;
+uniform mat4 u_MVPMatrix;
+attribute vec4 a_Position;
+attribute vec4 a_Color;
 varying vec4 test;
 
 void main() {
-    test = aColor;
-    gl_Position =  uMVPMatrix * vPosition;
+    test = a_Color;
+    gl_Position =  u_MVPMatrix * a_Position;
 }

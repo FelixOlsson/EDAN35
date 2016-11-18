@@ -5,7 +5,8 @@ package android.ahaonline.com.edan35;
  */
 
 import android.ahaonline.com.edan35.data.VertexBuffer;
-import android.ahaonline.com.edan35.programs.ShaderProgram;
+import android.ahaonline.com.edan35.programs.ShaderBuilder;
+import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.content.Context;
 import android.opengl.GLES20;
 
@@ -19,10 +20,10 @@ import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
  * Created by felix on 15/11/2016.
  */
 public class Cube {
-    private FloatBuffer vertexBuffer;
-    private FloatBuffer vertexBufferColor;
+    private VertexBuffer vertexBuffer;
+    private VertexBuffer vertexBufferColor;
 
-    private final int mProgram;
+
 
     private int mPositionHandle;
     private int mColorHandle;
@@ -32,8 +33,6 @@ public class Cube {
     private final int vertexCount = cubeCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * BYTES_PER_FLOAT; // 4 bytes per vertex
 
-    private final String vertexShaderCode;
-    private final String fragmentShaderCode;
 
 
 
@@ -78,7 +77,7 @@ public class Cube {
     };
 
     // Set color with red, gree, blue and alpha (opacity) values
-    float color[] = {0.583f,  0.771f,  0.014f,
+    float colorCoords[] = {0.583f,  0.771f,  0.014f,
             0.609f,  0.115f,  0.436f,
             0.327f,  0.483f,  0.844f,
             0.822f,  0.569f,  0.201f,
@@ -121,59 +120,25 @@ public class Cube {
 
         this.context = context;
 
-        vertexShaderCode = ShaderResourceReader.readShaderFromResource(context,R.raw.test_vertex_shader);
-        fragmentShaderCode = ShaderResourceReader.readShaderFromResource(context,R.raw.test_fragment_shader);
-
-        vertexBuffer = new VertexBuffer(cubeCoords).getVertexBuffer();
-        vertexBufferColor = new VertexBuffer(color).getVertexBuffer();
-
-
-        mProgram = ShaderProgram.buildProgram(vertexShaderCode, fragmentShaderCode);
+        vertexBuffer = new VertexBuffer(cubeCoords);
+        vertexBufferColor = new VertexBuffer(colorCoords);
 
     }
 
-    public void draw(float[] mvpMatrix) {
-        // Add program to OpenGL ES environment
-        GLES20.glUseProgram(mProgram);
+    public void bindShader(ShaderTestProgram shaderTestProgram) {
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderTestProgram.getPositionAttributeLocation(),
+                COORDS_PER_VERTEX, 0);
 
-        // get handle to vertex shader´s vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        vertexBufferColor.setVertexAttribPointer(0,
+                shaderTestProgram.getColorAttributeLocation(),
+                COORDS_PER_VERTEX, 0);
 
-        // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+    }
 
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
-
-        a_Color = GLES20.glGetAttribLocation(mProgram, "aColor");
-
-        // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(a_Color);
-
-        GLES20.glVertexAttribPointer(a_Color, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
-                vertexStride, vertexBufferColor);
-
-       /* // get handle to fragment shader´s vColor member
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-
-        // set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
-*/
-
-        // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-
-        // Pass the projection and view transformation to the shader
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-
+    public void draw() {
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
-
-        // Display the vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
-        GLES20.glDisableVertexAttribArray(a_Color);
     }
 }
 

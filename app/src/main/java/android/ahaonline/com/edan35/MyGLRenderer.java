@@ -1,5 +1,6 @@
 package android.ahaonline.com.edan35;
 
+import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -25,9 +26,8 @@ import static android.opengl.Matrix.setIdentityM;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
-    private Triangle triangle;
-    private Square square;
     private Cube cube;
+    private ShaderTestProgram shaderTestProgram;
 
     // modelViewProjectionMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] modelViewProjectionMatrix = new float[16];
@@ -45,8 +45,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GL_DEPTH_TEST);
         GLES20.glEnable(GL_CULL_FACE);
 
-        triangle = new Triangle(context);
-        square = new Square(context);
+        shaderTestProgram = new ShaderTestProgram(context);
         cube = new Cube(context);
         setIdentityM(modelMatrix, 0);
         scaleM(modelMatrix, 0, 0.5f, 0.5f, 0.5f);
@@ -79,7 +78,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         //triangle.draw(modelViewProjectionMatrix);
         //square.draw(modelViewProjectionMatrix);
-        cube.draw(modelViewProjectionMatrix);
+        shaderTestProgram.useProgram();
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
+        cube.bindShader(shaderTestProgram);
+        cube.draw();
 
     }
 
