@@ -32,7 +32,7 @@ public class ShaderBuilder {
         /**
          * Loads and compiles a vertex shader, returning the OpenGL object ID.
          */
-        public static int compileVertexShader(String shaderCode) {
+        private static int compileVertexShader(String shaderCode) {
             return compileShader(GL_VERTEX_SHADER, shaderCode);
         }
 
@@ -40,7 +40,7 @@ public class ShaderBuilder {
         /**
          * Loads and compiles a fragment shader, returning the OpenGL object ID.
          */
-        public static int compileFragmentShader(String shaderCode) {
+        private static int compileFragmentShader(String shaderCode) {
             return compileShader(GL_FRAGMENT_SHADER, shaderCode);
         }
 
@@ -48,7 +48,6 @@ public class ShaderBuilder {
 
             // Create a new shader object.
             final int shaderObjectId = glCreateShader(type);
-
 
             // Pass in the shader source.
             glShaderSource(shaderObjectId, shaderCode);
@@ -65,8 +64,6 @@ public class ShaderBuilder {
             if (compileStatus[0] == 0) {
                 // If it failed, delete the shader object.
                 glDeleteShader(shaderObjectId);
-
-
                 return 0;
             }
 
@@ -79,11 +76,10 @@ public class ShaderBuilder {
          * Links a vertex shader and a fragment shader together into an OpenGL
          * program. Returns the OpenGL program object ID, or 0 if linking failed.
          */
-        public static int linkProgram(int vertexShaderId, int fragmentShaderId) {
+        private static int linkProgram(int vertexShaderId, int fragmentShaderId) {
 
             // Create a new program object.
             final int programObjectId = glCreateProgram();
-
 
             // Attach the vertex shader to the program.
             glAttachShader(programObjectId, vertexShaderId);

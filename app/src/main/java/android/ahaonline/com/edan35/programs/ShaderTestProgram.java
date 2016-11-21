@@ -33,7 +33,7 @@ public class ShaderTestProgram extends ShaderProgram {
 }
 
     public void setUniforms(float[] mvpMatrix) {
-
+        //glUseProgram(program);
         glUniformMatrix4fv(uMVPMatrixLocation, 1, false, mvpMatrix, 0);
 
 

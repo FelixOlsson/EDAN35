@@ -45,4 +45,8 @@ public class ShaderProgram {
         glUseProgram(program);
     }
 
+    public int getProgram() {
+        return program;
+    }
+
 }

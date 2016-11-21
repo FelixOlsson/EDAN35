@@ -1,5 +1,6 @@
 package android.ahaonline.com.edan35;
 
+import android.ahaonline.com.edan35.Objects.Cube;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.content.Context;
 import android.opengl.GLES20;
@@ -15,6 +16,7 @@ import static android.opengl.Matrix.multiplyMM;
 import static android.opengl.Matrix.rotateM;
 import static android.opengl.Matrix.scaleM;
 import static android.opengl.Matrix.setIdentityM;
+import static android.opengl.Matrix.translateM;
 
 /**
  * Created by felix on 15/11/2016.
@@ -26,14 +28,13 @@ import static android.opengl.Matrix.setIdentityM;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
-    private Cube cube;
+    private Cube cube, cube2;
     private ShaderTestProgram shaderTestProgram;
 
     // modelViewProjectionMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] modelViewProjectionMatrix = new float[16];
     private final float[] projectionMatrix = new float[16];
     private final float[] viewMatrix = new float[16];
-    private final float[] modelMatrix = new float[16];
     private final float[] modelViewMatrix = new float[16];
 
     public MyGLRenderer(Context context) { this.context = context; }
@@ -47,8 +48,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         shaderTestProgram = new ShaderTestProgram(context);
         cube = new Cube(context);
-        setIdentityM(modelMatrix, 0);
-        scaleM(modelMatrix, 0, 0.5f, 0.5f, 0.5f);
+        cube2 = new Cube(context);
+        setIdentityM(cube.getModelMatrix(), 0);
+        scaleM(cube.getModelMatrix(), 0, 0.5f, 0.5f, 0.5f);
+
+        setIdentityM(cube2.getModelMatrix(), 0);
+        scaleM(cube2.getModelMatrix(), 0, 0.5f, 0.5f, 0.5f);
+        translateM(cube2.getModelMatrix(),0, 0.5f, 0f, 0f);
     }
 
     @Override
@@ -72,16 +78,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 
         // Calculate the projection and view transformation
-        rotateM(modelMatrix, 0, -1, 0f, 1f, 0f);
-        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+        rotateM(cube.getModelMatrix(), 0, -1, 0f, 1f, 0f);
+        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, cube.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+
 
         //triangle.draw(modelViewProjectionMatrix);
         //square.draw(modelViewProjectionMatrix);
-        shaderTestProgram.useProgram();
+        //shaderTestProgram.useProgram();
         shaderTestProgram.setUniforms(modelViewProjectionMatrix);
         cube.bindShader(shaderTestProgram);
         cube.draw();
+
+        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, cube2.getModelMatrix(), 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+        rotateM(cube2.getModelMatrix(), 0, -1, 0f, 1f, 0f);
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
+        cube2.bindShader(shaderTestProgram);
+        cube2.draw();
 
     }
 

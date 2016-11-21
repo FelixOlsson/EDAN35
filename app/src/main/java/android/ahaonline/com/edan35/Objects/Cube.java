@@ -1,4 +1,4 @@
-package android.ahaonline.com.edan35;
+package android.ahaonline.com.edan35.Objects;
 
 /**
  * Created by felix on 17/11/2016.
@@ -19,7 +19,7 @@ import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
 /**
  * Created by felix on 15/11/2016.
  */
-public class Cube {
+public class Cube extends AbstractObject{
     private VertexBuffer vertexBuffer;
     private VertexBuffer vertexBufferColor;
 
@@ -29,6 +29,7 @@ public class Cube {
     private int mColorHandle;
     private int a_Color;
     private int mMVPMatrixHandle;
+    private int program;
 
     private final int vertexCount = cubeCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * BYTES_PER_FLOAT; // 4 bytes per vertex
@@ -134,10 +135,12 @@ public class Cube {
                 shaderTestProgram.getColorAttributeLocation(),
                 COORDS_PER_VERTEX, 0);
 
+        program = shaderTestProgram.getProgram();
     }
 
     public void draw() {
         // Draw the triangle
+        GLES20.glUseProgram(program);
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
     }
 }
