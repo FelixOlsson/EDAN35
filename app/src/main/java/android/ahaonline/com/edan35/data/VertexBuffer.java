@@ -19,7 +19,7 @@ import static android.opengl.GLES20.glVertexAttribPointer;
 public class VertexBuffer {
 
     private final int bufferId;
-    //private final int bufferId;
+
     private final int BYTES_PER_FLOAT = 4;
 
 
