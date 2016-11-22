@@ -54,7 +54,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         setIdentityM(cube2.getModelMatrix(), 0);
         scaleM(cube2.getModelMatrix(), 0, 0.5f, 0.5f, 0.5f);
-        translateM(cube2.getModelMatrix(),0, 0.5f, 0f, 0f);
+        cube2.translate(3.5f, 0, 0);
+
     }
 
     @Override
@@ -76,9 +77,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         rotateM(viewMatrix, 0, -45, 1f, 0f, 0f);
         rotateM(viewMatrix, 0, -45, 0f, 1f, 0f);
 
-
-        // Calculate the projection and view transformation
-        rotateM(cube.getModelMatrix(), 0, -1, 0f, 1f, 0f);
+        cube.rotateX(1.0f);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, cube.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
@@ -87,16 +86,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         //triangle.draw(modelViewProjectionMatrix);
         //square.draw(modelViewProjectionMatrix);
         //shaderTestProgram.useProgram();
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
+        shaderTestProgram.useProgram();
         cube.bindShader(shaderTestProgram);
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
         cube.draw();
 
+        cube2.rotateZ(2f);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, cube2.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-        rotateM(cube2.getModelMatrix(), 0, -1, 0f, 1f, 0f);
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
+        //shaderTestProgram.useProgram();
         cube2.bindShader(shaderTestProgram);
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
         cube2.draw();
+
 
     }
 

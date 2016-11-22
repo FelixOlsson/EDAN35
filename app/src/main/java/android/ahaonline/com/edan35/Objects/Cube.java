@@ -127,6 +127,7 @@ public class Cube extends AbstractObject{
     }
 
     public void bindShader(ShaderTestProgram shaderTestProgram) {
+        //GLES20.glUseProgram(program);
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
                 COORDS_PER_VERTEX, 0);
@@ -140,7 +141,7 @@ public class Cube extends AbstractObject{
 
     public void draw() {
         // Draw the triangle
-        GLES20.glUseProgram(program);
+
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
     }
 }

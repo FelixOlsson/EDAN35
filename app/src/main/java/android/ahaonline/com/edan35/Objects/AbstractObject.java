@@ -1,7 +1,10 @@
 package android.ahaonline.com.edan35.Objects;
 
+import android.opengl.Matrix;
+
 import static android.R.attr.rotation;
 import static android.R.attr.x;
+import static android.opengl.Matrix.rotateM;
 
 /**
  * Created by Felix on 2016-11-21.
@@ -14,7 +17,22 @@ public class AbstractObject {
 
 
     public void translate(float x, float y, float z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        Matrix.translateM(modelMatrix, 0, x, y, z);
+    }
 
+    public void rotateX(float degree) {
+        rotateM(modelMatrix, 0, degree, 1f, 0f, 0f);
+    }
+
+    public void rotateY(float degree) {
+        rotateM(modelMatrix, 0, degree, 0f, 1f, 0f);
+    }
+
+    public void rotateZ(float degree) {
+        rotateM(modelMatrix, 0, degree, 0f, 0f, 1f);
     }
 
     public float getX() {
