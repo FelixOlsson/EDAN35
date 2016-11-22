@@ -102,5 +102,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     }
 
+    public void handleTouchDrag(float deltaX, float deltaY) {
+        cube.scale(1.001f);
+    }
+
 
 }
