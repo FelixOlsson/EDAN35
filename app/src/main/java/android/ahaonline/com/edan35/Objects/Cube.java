@@ -124,6 +124,7 @@ public class Cube extends AbstractObject{
         vertexBuffer = new VertexBuffer(cubeCoords);
         vertexBufferColor = new VertexBuffer(colorCoords);
 
+
     }
 
     public void bindShader(ShaderTestProgram shaderTestProgram) {

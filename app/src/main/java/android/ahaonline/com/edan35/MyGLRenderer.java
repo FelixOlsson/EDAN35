@@ -1,6 +1,7 @@
 package android.ahaonline.com.edan35;
 
 import android.ahaonline.com.edan35.Objects.Cube;
+import android.ahaonline.com.edan35.Objects.Sphere;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.content.Context;
 import android.opengl.GLES20;
@@ -29,6 +30,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
     private Cube cube, cube2;
+    private Sphere sphere;
     private ShaderTestProgram shaderTestProgram;
 
     // modelViewProjectionMatrix is an abbreviation for "Model View Projection Matrix"
@@ -45,6 +47,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glEnable(GL_DEPTH_TEST);
         GLES20.glEnable(GL_CULL_FACE);
+         //sphere = new Sphere(3f,3,3, context);
 
         shaderTestProgram = new ShaderTestProgram(context);
         cube = new Cube(context);
@@ -98,6 +101,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         cube2.bindShader(shaderTestProgram);
         shaderTestProgram.setUniforms(modelViewProjectionMatrix);
         cube2.draw();
+
+        /*sphere.bindShader(shaderTestProgram);
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
+        sphere.draw();*/
 
 
     }
