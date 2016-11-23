@@ -12,6 +12,7 @@ public class ShaderTestProgram extends ShaderProgram {
 
     // Unifrom locations
     private final int uMVPMatrixLocation;
+    private final int uColorLocation;
 
 
     // Attribute locations
@@ -25,6 +26,7 @@ public class ShaderTestProgram extends ShaderProgram {
 
         //Uniforms
         uMVPMatrixLocation = glGetUniformLocation(program, U_MVP_MATRIX);
+        uColorLocation = glGetUniformLocation(program, U_COLOR);
 
         //Attributes
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
@@ -32,9 +34,11 @@ public class ShaderTestProgram extends ShaderProgram {
 
 }
 
-    public void setUniforms(float[] mvpMatrix) {
+    public void setUniforms(float[] mvpMatrix, float[] color) {
         //glUseProgram(program);
         glUniformMatrix4fv(uMVPMatrixLocation, 1, false, mvpMatrix, 0);
+        glUniform4fv(uColorLocation, 1, color, 0);
+
 
 
     }

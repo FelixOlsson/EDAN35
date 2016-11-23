@@ -12,14 +12,19 @@ import android.util.FloatMath;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.R.attr.x;
+import static android.R.attr.y;
 import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
+import static android.ahaonline.com.edan35.Objects.Cube.cubeCoords;
 import static android.opengl.GLES20.GL_SHORT;
 import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.GL_UNSIGNED_BYTE;
+import static android.opengl.GLES20.GL_UNSIGNED_INT;
 import static android.opengl.GLES20.glDrawElements;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -29,59 +34,129 @@ import java.nio.FloatBuffer;
 /**
  * Created by felix on 22/11/2016.
  */
-public class Sphere {
+public class Sphere extends AbstractObject {
 
     private float[] vertices;
     private float[] normals;
     private float[] texcoords;
-    private short[] indices;
+    private int[] indices;
 
-    Sphere(float radius, int rings, int sectors) {
+    private VertexBuffer vertexBuffer;
+    private VertexBuffer vertexBufferColor;
 
-        float R = (float)1. / (float) (rings - 1);
-        float S = (float)1. / (float) (sectors - 1);
-        int r, s;
+    private Context context;
 
-        vertices = new float[(rings * sectors * 3)];
-        normals = new float[(rings * sectors * 3)];
-        texcoords = new float[(rings * sectors * 2)];
-        /*std::vector < GLfloat >::iterator v = vertices.begin();
-        std::vector < GLfloat >::iterator n = normals.begin();
-        std::vector < GLfloat >::iterator t = texcoords.begin();*/
+    private final int vertexCount;
+    private final IntBuffer indexArray;
+
+
+    //latitude = rings
+    //longitude = sectors
+
+    public Sphere(float radius, int latitudeBands, int longitudeBands, Context context) {
+
+
+
+        vertices = new float[((latitudeBands + 1) * (longitudeBands + 1) * 3)];
+        normals = new float[((latitudeBands + 1) * (longitudeBands + 1) * 3)];
+        texcoords = new float[((latitudeBands + 1) * (longitudeBands + 1) * 2)];
+
+        //vertices = new float[((latitudeBands) * (longitudeBands ) * 3)];
+        //normals = new float[((latitudeBands ) * (longitudeBands ) * 3)];
+        //texcoords = new float[((latitudeBands) * (longitudeBands ) * 2)];
+
+        vertexCount = vertices.length / COORDS_PER_VERTEX;
+
         int indexT = 0;
         int indexV = 0;
         int indexN = 0;
 
-        for (r = 0; r < rings; r++)
-            for (s = 0; s < sectors; s++) {
-                float  y = (float) Math.sin(-Math.PI/2 + Math.PI * r * R);
-                float  x = (float) (Math.cos(2 * Math.PI * s * S) * Math.sin(Math.PI * r * R));
-                float  z = (float) (Math.sin(2 * Math.PI * s * S) * Math.sin(Math.PI * r * R));
+        for (int latNumber  = 0; latNumber  <= latitudeBands; latNumber ++) {
 
-                texcoords[indexT++] = s * S;
-                texcoords[indexT++]  = r * R;
+            float theta = (float) (latNumber * Math.PI / latitudeBands);
+            float sinTheta = (float) Math.sin(theta);
+            float cosTheta = (float) Math.cos(theta);
 
-                vertices[indexV++] = x * radius;
-                vertices[indexV++] = y * radius;
-                vertices[indexV++] = z * radius;
+            for (int longNumber = 0; longNumber <= longitudeBands; longNumber++) {
+                float phi = (float) (longNumber * 2 * Math.PI / longitudeBands);
+                float sinPhi = (float) Math.sin(phi);
+                float cosPhi = (float) Math.cos(phi);
 
-                normals[indexN++] = -x;
-                normals[indexN++] = -y;
-                normals[indexN++] = -z;
+                float x = cosPhi * sinTheta;
+                float y = cosTheta;
+                float z = sinPhi * sinTheta;
+                float u = 1 - (longNumber / longitudeBands);
+                float v = 1 - (latNumber / latitudeBands);
+
+                normals[indexN++] = x;
+                normals[indexN++] = y;
+                normals[indexN++] = z;
+
+                texcoords[indexT++] = u;
+                texcoords[indexT++] = v;
+
+                vertices[indexV++] = radius * x;
+                vertices[indexV++] = radius * y;
+                vertices[indexV++] = radius * z;
+
+
             }
+        }
 
-        indices = new short[(rings * sectors * 4)];
-        //std::vector < GLushort >::iterator i = indices.begin();
+        indices = new int[(latitudeBands * longitudeBands * 6)];
         int indexI = 0;
-        for (r = 0; r < rings - 1; r++)
-            for (s = 0; s < sectors - 1; s++) {
+        for (int latNumber = 0; latNumber < latitudeBands ; latNumber++) {
+            for (int longNumber = 0; longNumber < longitudeBands - 1; longNumber++) {
 
-                indices[indexI++] = (short)((r + 1) * sectors + s);
-                indices[indexI++] = (short )((r + 1) * sectors + (s + 1));
-                indices[indexI++] = (short) (r * sectors + (s + 1));
-                indices[indexI++] = (short) (r * sectors + s);
+                int first = (latNumber * (longitudeBands + 1)) + longNumber;
+                int second = first + longitudeBands + 1;
+
+                indices[indexI++] = first;
+                indices[indexI++] = second;
+                indices[indexI++] = first + 1;
+
+                indices[indexI++] = second;
+                indices[indexI++] = second + 1;
+                indices[indexI++] = first + 1;
 
             }
+        }
+
+        this.context = context;
+
+        vertexBuffer = new VertexBuffer(vertices);
+        vertexBufferColor = new VertexBuffer(vertices);
+
+        indexArray = IntBuffer.allocate(indices.length).put(indices);
+
+        indexArray.position(0);
+
+        System.out.println(indexN);
+        System.out.println(normals.length);
+        System.out.println(((latitudeBands + 1) * (longitudeBands + 1) * 3));
+
+    }
+
+    public void bindShader(ShaderTestProgram shaderTestProgram) {
+        //GLES20.glUseProgram(program);
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderTestProgram.getPositionAttributeLocation(),
+                COORDS_PER_VERTEX, 0);
+
+        vertexBufferColor.setVertexAttribPointer(0,
+                shaderTestProgram.getColorAttributeLocation(),
+                COORDS_PER_VERTEX, 0);
+
+
+    }
+
+    public void draw() {
+        // Draw the triangle
+        //System.out.println(vertices.length);
+        //System.out.println(indices.length);
+
+        GLES20.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, indexArray);
+        //GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
     }
 
 

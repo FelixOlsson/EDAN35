@@ -47,7 +47,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glEnable(GL_DEPTH_TEST);
         GLES20.glEnable(GL_CULL_FACE);
-         //sphere = new Sphere(3f,3,3, context);
+        sphere = new Sphere(3f,10,10, context);
+        setIdentityM(sphere.getModelMatrix(), 0);
+        scaleM(sphere.getModelMatrix(), 0, 0.1f, 0.1f, 0.1f);
 
         shaderTestProgram = new ShaderTestProgram(context);
         cube = new Cube(context);
@@ -76,7 +78,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(viewMatrix, 0, 0, 0, -7, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(viewMatrix, 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         rotateM(viewMatrix, 0, -45, 1f, 0f, 0f);
         rotateM(viewMatrix, 0, -45, 0f, 1f, 0f);
 
@@ -88,10 +90,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         //triangle.draw(modelViewProjectionMatrix);
         //square.draw(modelViewProjectionMatrix);
-        //shaderTestProgram.useProgram();
+        shaderTestProgram.useProgram();
         shaderTestProgram.useProgram();
         cube.bindShader(shaderTestProgram);
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {1f,0f,0f,1f});
         cube.draw();
 
         cube2.rotateZ(2f);
@@ -99,18 +101,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
         //shaderTestProgram.useProgram();
         cube2.bindShader(shaderTestProgram);
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {1f,0f,0f,1f});
         cube2.draw();
 
-        /*sphere.bindShader(shaderTestProgram);
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix);
-        sphere.draw();*/
+        sphere.rotateZ(2f);
+        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, sphere.getModelMatrix(), 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+       shaderTestProgram.useProgram();
+        sphere.bindShader(shaderTestProgram);
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {1f,0f,0f,1f});
+        sphere.draw();
 
 
     }
 
     public void handleTouchDrag(float deltaX, float deltaY) {
         cube.scale(1.001f);
+        sphere.scale(1.01f);
     }
 
 
