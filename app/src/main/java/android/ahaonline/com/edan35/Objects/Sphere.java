@@ -101,7 +101,7 @@ public class Sphere extends AbstractObject {
         indices = new int[((latitudeBands + 1) * (longitudeBands + 1) * 6)];
         int indexI = 0;
         for (int latNumber = 0; latNumber <= latitudeBands ; latNumber++) {
-            for (int longNumber = 0; longNumber <= longitudeBands - 1; longNumber++) {
+            for (int longNumber = 0; longNumber <= longitudeBands - 1 ; longNumber++) {
 
                 int first = (latNumber * (longitudeBands + 1)) + longNumber;
                 int second = first + longitudeBands + 1;
@@ -146,11 +146,11 @@ public class Sphere extends AbstractObject {
         //GLES20.glUseProgram(program);
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
-                3, (3 + 2) * 4);
+                3, 5 * 4);
 
-        vertexBuffer.setVertexAttribPointer(3 * 4,
+        vertexBuffer.setVertexAttribPointer(3,
                 shaderTestProgram.getaTextureCoordinatesAttributeLocation(),
-                2, (3 + 2) * 4);
+                2, 5 * 4);
 
 
     }

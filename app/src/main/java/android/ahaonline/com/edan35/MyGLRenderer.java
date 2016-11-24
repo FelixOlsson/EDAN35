@@ -54,8 +54,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GL_CULL_FACE);
         GLES20.glEnable(GL_DEPTH_TEST);
         textureShaderProgram = new TextureShaderProgram(context);
-        texture = TextureHelper.loadTexture(context, R.drawable.moon);
-        sphere = new Sphere(3f,30,30, context);
+        texture = TextureHelper.loadTexture(context, R.drawable.mar0kuu2);
+        sphere = new Sphere(3f,3,3, context);
        setIdentityM(sphere.getModelMatrix(), 0);
         scaleM(sphere.getModelMatrix(), 0, 1f, 1f, 1f);
         sphere.translate(0f, 0, 15f);
