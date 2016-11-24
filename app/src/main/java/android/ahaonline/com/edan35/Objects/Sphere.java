@@ -5,6 +5,7 @@ import android.ahaonline.com.edan35.R;
 import android.ahaonline.com.edan35.data.IndexBuffer;
 import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
+import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.util.FloatMath;
@@ -43,6 +44,7 @@ public class Sphere extends AbstractObject {
 
     private VertexBuffer vertexBuffer;
     private VertexBuffer vertexBufferColor;
+    private VertexBuffer vertexBufferTexture;
 
     private Context context;
 
@@ -50,20 +52,11 @@ public class Sphere extends AbstractObject {
     private final IntBuffer indexArray;
 
 
-    //latitude = rings
-    //longitude = sectors
-
     public Sphere(float radius, int latitudeBands, int longitudeBands, Context context) {
-
-
 
         vertices = new float[((latitudeBands + 1) * (longitudeBands + 1) * 3)];
         normals = new float[((latitudeBands + 1) * (longitudeBands + 1) * 3)];
         texcoords = new float[((latitudeBands + 1) * (longitudeBands + 1) * 2)];
-
-        //vertices = new float[((latitudeBands) * (longitudeBands ) * 3)];
-        //normals = new float[((latitudeBands ) * (longitudeBands ) * 3)];
-        //texcoords = new float[((latitudeBands) * (longitudeBands ) * 2)];
 
         vertexCount = vertices.length / COORDS_PER_VERTEX;
 
@@ -103,10 +96,10 @@ public class Sphere extends AbstractObject {
             }
         }
 
-        indices = new int[(latitudeBands * longitudeBands * 6)];
+        indices = new int[((latitudeBands + 1) * (longitudeBands + 1) * 6)];
         int indexI = 0;
-        for (int latNumber = 0; latNumber < latitudeBands ; latNumber++) {
-            for (int longNumber = 0; longNumber < longitudeBands - 1; longNumber++) {
+        for (int latNumber = 0; latNumber <= latitudeBands ; latNumber++) {
+            for (int longNumber = 0; longNumber <= longitudeBands - 1; longNumber++) {
 
                 int first = (latNumber * (longitudeBands + 1)) + longNumber;
                 int second = first + longitudeBands + 1;
@@ -126,18 +119,15 @@ public class Sphere extends AbstractObject {
 
         vertexBuffer = new VertexBuffer(vertices);
         vertexBufferColor = new VertexBuffer(vertices);
+        vertexBufferTexture = new VertexBuffer(texcoords);
 
         indexArray = IntBuffer.allocate(indices.length).put(indices);
 
         indexArray.position(0);
 
-        System.out.println(indexN);
-        System.out.println(normals.length);
-        System.out.println(((latitudeBands + 1) * (longitudeBands + 1) * 3));
-
     }
 
-    public void bindShader(ShaderTestProgram shaderTestProgram) {
+   /* public void bindShader(ShaderTestProgram shaderTestProgram) {
         //GLES20.glUseProgram(program);
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
@@ -148,15 +138,23 @@ public class Sphere extends AbstractObject {
                 COORDS_PER_VERTEX, 0);
 
 
+    }*/
+
+    public void bindShader(TextureShaderProgram shaderTestProgram) {
+        //GLES20.glUseProgram(program);
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderTestProgram.getPositionAttributeLocation(),
+                COORDS_PER_VERTEX, 0);
+
+        vertexBufferTexture.setVertexAttribPointer(0,
+                shaderTestProgram.getaTextureCoordinatesAttributeLocation(),
+                2, 0);
+
+
     }
 
     public void draw() {
-        // Draw the triangle
-        //System.out.println(vertices.length);
-        //System.out.println(indices.length);
-
         GLES20.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, indexArray);
-        //GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
     }
 
 

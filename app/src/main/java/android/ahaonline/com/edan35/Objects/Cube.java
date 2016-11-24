@@ -122,7 +122,7 @@ public class Cube extends AbstractObject{
         this.context = context;
 
         vertexBuffer = new VertexBuffer(cubeCoords);
-        vertexBufferColor = new VertexBuffer(cubeCoords);
+        vertexBufferColor = new VertexBuffer(colorCoords);
 
 
     }
@@ -141,7 +141,6 @@ public class Cube extends AbstractObject{
     }
 
     public void draw() {
-        // Draw the triangle
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
     }

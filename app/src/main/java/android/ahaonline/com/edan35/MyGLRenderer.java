@@ -3,6 +3,8 @@ package android.ahaonline.com.edan35;
 import android.ahaonline.com.edan35.Objects.Cube;
 import android.ahaonline.com.edan35.Objects.Sphere;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
+import android.ahaonline.com.edan35.programs.TextureHelper;
+import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -32,6 +34,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Cube cube, cube2;
     private Sphere sphere;
     private ShaderTestProgram shaderTestProgram;
+    private TextureShaderProgram textureShaderProgram;
+
+    private int texture;
 
     // modelViewProjectionMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] modelViewProjectionMatrix = new float[16];
@@ -45,11 +50,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         // Set the background frame color
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        GLES20.glEnable(GL_DEPTH_TEST);
+
         GLES20.glEnable(GL_CULL_FACE);
-        sphere = new Sphere(3f,10,10, context);
-        setIdentityM(sphere.getModelMatrix(), 0);
-        scaleM(sphere.getModelMatrix(), 0, 0.1f, 0.1f, 0.1f);
+        GLES20.glEnable(GL_DEPTH_TEST);
+        textureShaderProgram = new TextureShaderProgram(context);
+        texture = TextureHelper.loadTexture(context, R.drawable.moon);
+        sphere = new Sphere(3f,30,30, context);
+       setIdentityM(sphere.getModelMatrix(), 0);
+        scaleM(sphere.getModelMatrix(), 0, 1f, 1f, 1f);
+        sphere.translate(0f, 0, 15f);
 
         shaderTestProgram = new ShaderTestProgram(context);
         cube = new Cube(context);
@@ -61,6 +70,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         scaleM(cube2.getModelMatrix(), 0, 0.5f, 0.5f, 0.5f);
         cube2.translate(3.5f, 0, 0);
 
+
+
     }
 
     @Override
@@ -69,7 +80,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         float ratio = (float) width / height;
 
-        Matrix.perspectiveM(projectionMatrix, 0, 45f, ratio, 1f, 100f);
+        Matrix.perspectiveM(projectionMatrix, 0, 45f, ratio, 3f, 100f);
 
     }
 
@@ -77,12 +88,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 unused) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
+
+
+
         // Set the camera position (View matrix)
         Matrix.setLookAtM(viewMatrix, 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-        rotateM(viewMatrix, 0, -45, 1f, 0f, 0f);
-        rotateM(viewMatrix, 0, -45, 0f, 1f, 0f);
+        //rotateM(viewMatrix, 0, -45, 1f, 0f, 0f);
+       // rotateM(viewMatrix, 0, -45, 0f, 1f, 0f);
 
-        cube.rotateX(1.0f);
+       /* cube.rotateX(1.0f);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, cube.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
@@ -91,9 +105,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         //triangle.draw(modelViewProjectionMatrix);
         //square.draw(modelViewProjectionMatrix);
         shaderTestProgram.useProgram();
-        shaderTestProgram.useProgram();
         cube.bindShader(shaderTestProgram);
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {1f,0f,0f,1f});
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {0f,1f,0f,1f});
         cube.draw();
 
         cube2.rotateZ(2f);
@@ -101,16 +114,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
         //shaderTestProgram.useProgram();
         cube2.bindShader(shaderTestProgram);
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {1f,0f,0f,1f});
-        cube2.draw();
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {0f,0f,1f,1f});
+        cube2.draw();*/
 
-        sphere.rotateZ(2f);
+        sphere.rotateY(2f);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, sphere.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
-       shaderTestProgram.useProgram();
-        sphere.bindShader(shaderTestProgram);
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {1f,0f,0f,1f});
+        textureShaderProgram.useProgram();
+        sphere.bindShader(textureShaderProgram);
+        textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
         sphere.draw();
 
 
@@ -118,7 +131,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public void handleTouchDrag(float deltaX, float deltaY) {
         cube.scale(1.001f);
-        sphere.scale(1.01f);
+        sphere.translate(0,0,-1f);
     }
 
 
