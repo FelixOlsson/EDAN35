@@ -54,7 +54,7 @@ public class Sphere extends AbstractObject {
 
     public Sphere(float radius, int latitudeBands, int longitudeBands, Context context) {
 
-        vertices = new float[((latitudeBands + 1) * (longitudeBands + 1) * 3)];
+        vertices = new float[((latitudeBands + 1) * (longitudeBands + 1) * 3 * 2)];
         normals = new float[((latitudeBands + 1) * (longitudeBands + 1) * 3)];
         texcoords = new float[((latitudeBands + 1) * (longitudeBands + 1) * 2)];
 
@@ -85,12 +85,14 @@ public class Sphere extends AbstractObject {
                 normals[indexN++] = y;
                 normals[indexN++] = z;
 
-                texcoords[indexT++] = u;
-                texcoords[indexT++] = v;
-
                 vertices[indexV++] = radius * x;
                 vertices[indexV++] = radius * y;
                 vertices[indexV++] = radius * z;
+
+                vertices[indexV++] = u;
+                vertices[indexV++] = v;
+
+
 
 
             }
@@ -144,11 +146,11 @@ public class Sphere extends AbstractObject {
         //GLES20.glUseProgram(program);
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
-                COORDS_PER_VERTEX, 0);
+                3, (3 + 2) * 4);
 
-        vertexBufferTexture.setVertexAttribPointer(0,
+        vertexBuffer.setVertexAttribPointer(3 * 4,
                 shaderTestProgram.getaTextureCoordinatesAttributeLocation(),
-                2, 0);
+                2, (3 + 2) * 4);
 
 
     }
