@@ -55,13 +55,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GL_DEPTH_TEST);
         textureShaderProgram = new TextureShaderProgram(context);
         texture = TextureHelper.loadTexture(context, R.drawable.mar0kuu2);
-        sphere = new Sphere(3f,3,3, context);
+        sphere = new Sphere(3f,30,30, context);
        setIdentityM(sphere.getModelMatrix(), 0);
         scaleM(sphere.getModelMatrix(), 0, 1f, 1f, 1f);
         sphere.translate(0f, 0, 15f);
 
         shaderTestProgram = new ShaderTestProgram(context);
         cube = new Cube(context);
+        cube.scale(3f);
         cube2 = new Cube(context);
         setIdentityM(cube.getModelMatrix(), 0);
         scaleM(cube.getModelMatrix(), 0, 0.5f, 0.5f, 0.5f);
@@ -96,7 +97,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         //rotateM(viewMatrix, 0, -45, 1f, 0f, 0f);
        // rotateM(viewMatrix, 0, -45, 0f, 1f, 0f);
 
-       /* cube.rotateX(1.0f);
+        cube.rotateX(1.0f);
+       // cube.scale(2f);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, cube.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
@@ -104,11 +106,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         //triangle.draw(modelViewProjectionMatrix);
         //square.draw(modelViewProjectionMatrix);
-        shaderTestProgram.useProgram();
-        cube.bindShader(shaderTestProgram);
-        shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {0f,1f,0f,1f});
+        textureShaderProgram.useProgram();
+        cube.bindShader(textureShaderProgram);
+        textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
         cube.draw();
-
+        /*
         cube2.rotateZ(2f);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, cube2.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);

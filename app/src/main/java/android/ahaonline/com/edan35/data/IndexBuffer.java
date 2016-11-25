@@ -17,6 +17,7 @@ import static android.opengl.GLES20.glGenBuffers;
  */
 public class IndexBuffer {
     private final int bufferId;
+    public int numItems;
 
     public IndexBuffer(short[] indexData) {
         // Allocate a buffer.

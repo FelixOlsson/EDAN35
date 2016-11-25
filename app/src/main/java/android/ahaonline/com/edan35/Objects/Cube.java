@@ -7,6 +7,7 @@ package android.ahaonline.com.edan35.Objects;
 import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.ShaderBuilder;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
+import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
 
@@ -22,6 +23,7 @@ import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
 public class Cube extends AbstractObject{
     private VertexBuffer vertexBuffer;
     private VertexBuffer vertexBufferColor;
+    private VertexBuffer vertexBufferCoords;
 
     private Context context;
 
@@ -115,6 +117,45 @@ public class Cube extends AbstractObject{
             0.820f,  0.883f,  0.371f,
             0.982f,  0.099f,  0.879f};
 
+    float uvCooords[] = {
+            0.000059f, 1.0f-0.000004f,
+            0.000103f, 1.0f-0.336048f,
+            0.335973f, 1.0f-0.335903f,
+            1.000023f, 1.0f-0.000013f,
+            0.667979f, 1.0f-0.335851f,
+            0.999958f, 1.0f-0.336064f,
+            0.667979f, 1.0f-0.335851f,
+            0.336024f, 1.0f-0.671877f,
+            0.667969f, 1.0f-0.671889f,
+            1.000023f, 1.0f-0.000013f,
+            0.668104f, 1.0f-0.000013f,
+            0.667979f, 1.0f-0.335851f,
+            0.000059f, 1.0f-0.000004f,
+            0.335973f, 1.0f-0.335903f,
+            0.336098f, 1.0f-0.000071f,
+            0.667979f, 1.0f-0.335851f,
+            0.335973f, 1.0f-0.335903f,
+            0.336024f, 1.0f-0.671877f,
+            1.000004f, 1.0f-0.671847f,
+            0.999958f, 1.0f-0.336064f,
+            0.667979f, 1.0f-0.335851f,
+            0.668104f, 1.0f-0.000013f,
+            0.335973f, 1.0f-0.335903f,
+            0.667979f, 1.0f-0.335851f,
+            0.335973f, 1.0f-0.335903f,
+            0.668104f, 1.0f-0.000013f,
+            0.336098f, 1.0f-0.000071f,
+            0.000103f, 1.0f-0.336048f,
+            0.000004f, 1.0f-0.671870f,
+            0.336024f, 1.0f-0.671877f,
+            0.000103f, 1.0f-0.336048f,
+            0.336024f, 1.0f-0.671877f,
+            0.335973f, 1.0f-0.335903f,
+            0.667969f, 1.0f-0.671889f,
+            1.000004f, 1.0f-0.671847f,
+            0.667979f, 1.0f-0.335851f
+    };
+
 
 
     public Cube(Context context) {
@@ -123,6 +164,7 @@ public class Cube extends AbstractObject{
 
         vertexBuffer = new VertexBuffer(cubeCoords);
         vertexBufferColor = new VertexBuffer(colorCoords);
+        vertexBufferCoords = new VertexBuffer(uvCooords);
 
 
     }
@@ -138,6 +180,19 @@ public class Cube extends AbstractObject{
                 COORDS_PER_VERTEX, 0);
 
         program = shaderTestProgram.getProgram();
+    }
+
+    public void bindShader(TextureShaderProgram shaderTestProgram) {
+        //GLES20.glUseProgram(program);
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderTestProgram.getPositionAttributeLocation(),
+                3, 0);
+
+        vertexBufferCoords.setVertexAttribPointer(0,
+                shaderTestProgram.getaTextureCoordinatesAttributeLocation(),
+                2, 0);
+
+
     }
 
     public void draw() {

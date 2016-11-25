@@ -20,13 +20,21 @@ import javax.microedition.khronos.opengles.GL10;
 
 import static android.R.attr.x;
 import static android.R.attr.y;
+import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
 import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
 import static android.ahaonline.com.edan35.Objects.Cube.cubeCoords;
+import static android.opengl.GLES20.GL_ELEMENT_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_SHORT;
+import static android.opengl.GLES20.GL_STATIC_DRAW;
 import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.GL_UNSIGNED_BYTE;
 import static android.opengl.GLES20.GL_UNSIGNED_INT;
+import static android.opengl.GLES20.GL_UNSIGNED_SHORT;
+import static android.opengl.GLES20.glBindBuffer;
+import static android.opengl.GLES20.glBufferData;
 import static android.opengl.GLES20.glDrawElements;
+import static android.opengl.GLES20.glGenBuffers;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -48,8 +56,14 @@ public class Sphere extends AbstractObject {
 
     private Context context;
 
+    private int itemSize;
+    private int numItems;
+
     private final int vertexCount;
-    private final IntBuffer indexArray;
+    private final int buffers[];
+
+    private IntBuffer indexArray;
+   // private final IndexBuffer indexArray;
 
 
     public Sphere(float radius, int latitudeBands, int longitudeBands, Context context) {
@@ -103,8 +117,8 @@ public class Sphere extends AbstractObject {
         for (int latNumber = 0; latNumber <= latitudeBands ; latNumber++) {
             for (int longNumber = 0; longNumber <= longitudeBands - 1 ; longNumber++) {
 
-                int first = (latNumber * (longitudeBands + 1)) + longNumber;
-                int second = first + longitudeBands + 1;
+                short first = (short)((latNumber * (longitudeBands + 1)) + longNumber);
+                short second = (short)(first + longitudeBands + 1);
 
                 indices[indexI++] = first;
                 indices[indexI++] = second;
@@ -123,9 +137,30 @@ public class Sphere extends AbstractObject {
         vertexBufferColor = new VertexBuffer(vertices);
         vertexBufferTexture = new VertexBuffer(texcoords);
 
-        indexArray = IntBuffer.allocate(indices.length).put(indices);
+        buffers= new int[1];
+        glGenBuffers(buffers.length, buffers, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
 
+        indexArray = ByteBuffer
+                .allocateDirect(indices.length * 32 )
+                .order(ByteOrder.nativeOrder())
+                .asIntBuffer()
+                .put(indices);
         indexArray.position(0);
+
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray.capacity()
+                * Constants.BYTES_PER_SHORT, indexArray, GL_STATIC_DRAW);
+
+
+        itemSize = 1;
+        numItems = indices.length;
+
+        //indexArray = IntBuffer.allocate(indices.length).put(indices);
+
+        //indexArray.position(0);
+        //indexArray = new IndexBuffer(indices);
+        //indexArray.numItems = indices.length;
+
 
     }
 
@@ -156,7 +191,10 @@ public class Sphere extends AbstractObject {
     }
 
     public void draw() {
-        GLES20.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, indexArray);
+
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
+
+        GLES20.glDrawElements(GL_TRIANGLES, numItems, GL_UNSIGNED_INT, 0);
     }
 
 
