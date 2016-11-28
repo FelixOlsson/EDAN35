@@ -1,6 +1,7 @@
 package android.ahaonline.com.edan35;
 
 import android.ahaonline.com.edan35.Objects.Cube;
+import android.ahaonline.com.edan35.Objects.Model;
 import android.ahaonline.com.edan35.Objects.Sphere;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureHelper;
@@ -13,6 +14,7 @@ import android.opengl.Matrix;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.R.attr.mode;
 import static android.opengl.GLES20.GL_CULL_FACE;
 import static android.opengl.GLES20.GL_DEPTH_TEST;
 import static android.opengl.Matrix.multiplyMM;
@@ -35,6 +37,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Sphere sphere;
     private ShaderTestProgram shaderTestProgram;
     private TextureShaderProgram textureShaderProgram;
+    private Model model;
 
     private int texture;
 
@@ -54,12 +57,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GL_CULL_FACE);
         GLES20.glEnable(GL_DEPTH_TEST);
         textureShaderProgram = new TextureShaderProgram(context);
-        texture = TextureHelper.loadTexture(context, R.drawable.mar0kuu2);
+        texture = TextureHelper.loadTexture(context, R.drawable.banana);
         sphere = new Sphere(3f,30,30, context);
        setIdentityM(sphere.getModelMatrix(), 0);
         scaleM(sphere.getModelMatrix(), 0, 1f, 1f, 1f);
         sphere.translate(0f, 0, 15f);
-
+        model = new Model();
+        model.loadModel(context, R.raw.cube2);
         shaderTestProgram = new ShaderTestProgram(context);
         cube = new Cube(context);
         cube.scale(3f);
@@ -119,14 +123,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         shaderTestProgram.setUniforms(modelViewProjectionMatrix, new float[] {0f,0f,1f,1f});
         cube2.draw();*/
 
-        sphere.rotateY(2f);
+        /*sphere.rotateY(2f);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, sphere.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
         textureShaderProgram.useProgram();
         sphere.bindShader(textureShaderProgram);
         textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
-        sphere.draw();
+        sphere.draw();*/
 
 
     }

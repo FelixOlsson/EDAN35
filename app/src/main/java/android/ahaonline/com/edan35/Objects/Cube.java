@@ -10,11 +10,14 @@ import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
+import android.ahaonline.com.edan35.data.banana;
 
 import java.nio.FloatBuffer;
 
+import static android.R.attr.data;
 import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
 import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
+import static android.ahaonline.com.edan35.R.drawable.banana;
 
 
 /**
@@ -33,14 +36,14 @@ public class Cube extends AbstractObject{
     private int mMVPMatrixHandle;
     private int program;
 
-    private final int vertexCount = cubeCoords.length / COORDS_PER_VERTEX;
+    //private final int vertexCount = cubeCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * BYTES_PER_FLOAT; // 4 bytes per vertex
 
 
 
+    static float cubeCoords[] = android.ahaonline.com.edan35.data.banana.cubeVerts;
 
-
-    static float cubeCoords[] = {   // in counterclockwise order:
+    /*static float cubeCoords[] = {   // in counterclockwise order:
             -1.0f,-1.0f,-1.0f, // triangle 1 : begin
             -1.0f,-1.0f, 1.0f,
             -1.0f, 1.0f, 1.0f, // triangle 1 : end
@@ -77,10 +80,10 @@ public class Cube extends AbstractObject{
             1.0f, 1.0f, 1.0f,
             -1.0f, 1.0f, 1.0f,
             1.0f,-1.0f, 1.0f
-    };
+    };*/
 
     // Set color with red, gree, blue and alpha (opacity) values
-    float colorCoords[] = {0.583f,  0.771f,  0.014f,
+   /* float colorCoords[] = {0.583f,  0.771f,  0.014f,
             0.609f,  0.115f,  0.436f,
             0.327f,  0.483f,  0.844f,
             0.822f,  0.569f,  0.201f,
@@ -115,7 +118,9 @@ public class Cube extends AbstractObject{
             0.393f,  0.621f,  0.362f,
             0.673f,  0.211f,  0.457f,
             0.820f,  0.883f,  0.371f,
-            0.982f,  0.099f,  0.879f};
+            0.982f,  0.099f,  0.879f};*/
+
+
 
     float uvCooords[] = {
             0.000059f, 1.0f-0.000004f,
@@ -163,7 +168,7 @@ public class Cube extends AbstractObject{
         this.context = context;
 
         vertexBuffer = new VertexBuffer(cubeCoords);
-        vertexBufferColor = new VertexBuffer(colorCoords);
+       // vertexBufferColor = new VertexBuffer(colorCoords);
         vertexBufferCoords = new VertexBuffer(uvCooords);
 
 
@@ -189,7 +194,7 @@ public class Cube extends AbstractObject{
                 3, 0);
 
         vertexBufferCoords.setVertexAttribPointer(0,
-                shaderTestProgram.getaTextureCoordinatesAttributeLocation(),
+                shaderTestProgram.getTextureCoordinatesAttributeLocation(),
                 2, 0);
 
 
@@ -197,7 +202,7 @@ public class Cube extends AbstractObject{
 
     public void draw() {
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, android.ahaonline.com.edan35.data.banana.cubeNumVerts);
     }
 }
 

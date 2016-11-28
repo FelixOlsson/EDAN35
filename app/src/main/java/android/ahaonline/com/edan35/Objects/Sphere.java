@@ -8,6 +8,7 @@ import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.util.FloatMath;
 
 import java.nio.ByteBuffer;
@@ -26,6 +27,7 @@ import static android.ahaonline.com.edan35.Objects.Cube.cubeCoords;
 import static android.opengl.GLES20.GL_ELEMENT_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_SHORT;
 import static android.opengl.GLES20.GL_STATIC_DRAW;
+import static android.opengl.GLES20.GL_STREAM_DRAW;
 import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.GL_UNSIGNED_BYTE;
 import static android.opengl.GLES20.GL_UNSIGNED_INT;
@@ -63,7 +65,7 @@ public class Sphere extends AbstractObject {
     private final int buffers[];
 
     private IntBuffer indexArray;
-   // private final IndexBuffer indexArray;
+    //private final IndexBuffer indexArray;
 
 
     public Sphere(float radius, int latitudeBands, int longitudeBands, Context context) {
@@ -92,8 +94,8 @@ public class Sphere extends AbstractObject {
                 float x = cosPhi * sinTheta;
                 float y = cosTheta;
                 float z = sinPhi * sinTheta;
-                float u = 1 - (longNumber / longitudeBands);
-                float v = 1 - (latNumber / latitudeBands);
+                float u = (longNumber / longitudeBands);
+                float v = 1.0f - (latNumber / latitudeBands);
 
                 normals[indexN++] = x;
                 normals[indexN++] = y;
@@ -103,8 +105,9 @@ public class Sphere extends AbstractObject {
                 vertices[indexV++] = radius * y;
                 vertices[indexV++] = radius * z;
 
-                vertices[indexV++] = u;
-                vertices[indexV++] = v;
+                texcoords[indexT++] = u;
+                texcoords[indexT++] = v;
+
 
 
 
@@ -137,7 +140,7 @@ public class Sphere extends AbstractObject {
         vertexBufferColor = new VertexBuffer(vertices);
         vertexBufferTexture = new VertexBuffer(texcoords);
 
-        buffers= new int[1];
+       buffers= new int[1];
         glGenBuffers(buffers.length, buffers, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
 
@@ -149,16 +152,27 @@ public class Sphere extends AbstractObject {
         indexArray.position(0);
 
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray.capacity()
-                * Constants.BYTES_PER_SHORT, indexArray, GL_STATIC_DRAW);
+                * Constants.BYTES_PER_SHORT, indexArray, GL_STREAM_DRAW);
 
 
         itemSize = 1;
         numItems = indices.length;
 
+        System.out.println(vertices.length/3);
+        System.out.println(texcoords.length/2);
+
         //indexArray = IntBuffer.allocate(indices.length).put(indices);
 
         //indexArray.position(0);
-        //indexArray = new IndexBuffer(indices);
+
+       /* short inShort[] = new short[indices.length];
+
+        for(int i = 0; i < indices.length; i++)
+        {
+            inShort[i] = (short)indices[i];
+        }
+
+        indexArray = new IndexBuffer(inShort);*/
         //indexArray.numItems = indices.length;
 
 
@@ -181,11 +195,11 @@ public class Sphere extends AbstractObject {
         //GLES20.glUseProgram(program);
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
-                3, 5 * 4);
+                3, 0);
 
-        vertexBuffer.setVertexAttribPointer(3,
-                shaderTestProgram.getaTextureCoordinatesAttributeLocation(),
-                2, 5 * 4);
+        vertexBufferTexture.setVertexAttribPointer(0,
+                shaderTestProgram.getTextureCoordinatesAttributeLocation(),
+                2, 0);
 
 
     }
