@@ -17,7 +17,7 @@ import java.nio.FloatBuffer;
 import static android.R.attr.data;
 import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
 import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
-import static android.ahaonline.com.edan35.R.drawable.banana;
+
 
 
 /**

@@ -8,6 +8,7 @@ import java.nio.ShortBuffer;
 
 import static android.opengl.GLES20.GL_ELEMENT_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_STATIC_DRAW;
+import static android.opengl.GLES20.GL_STREAM_DRAW;
 import static android.opengl.GLES20.glBindBuffer;
 import static android.opengl.GLES20.glBufferData;
 import static android.opengl.GLES20.glGenBuffers;
@@ -42,7 +43,7 @@ public class IndexBuffer {
 
         // Transfer data from memory to GPU buffer.
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray.capacity()
-                * Constants.BYTES_PER_SHORT, indexArray, GL_STATIC_DRAW);
+                * Constants.BYTES_PER_SHORT, indexArray, GL_STREAM_DRAW);
 
         // IMPORTANT: Unbind from buffer when we're done with it
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

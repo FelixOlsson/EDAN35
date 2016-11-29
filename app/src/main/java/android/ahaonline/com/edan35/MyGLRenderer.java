@@ -57,7 +57,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GL_CULL_FACE);
         GLES20.glEnable(GL_DEPTH_TEST);
         textureShaderProgram = new TextureShaderProgram(context);
-        texture = TextureHelper.loadTexture(context, R.drawable.banana);
+        texture = TextureHelper.loadTexture(context, R.drawable.earth);
         sphere = new Sphere(3f,30,30, context);
        setIdentityM(sphere.getModelMatrix(), 0);
         scaleM(sphere.getModelMatrix(), 0, 1f, 1f, 1f);
@@ -69,7 +69,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         cube.scale(3f);
         cube2 = new Cube(context);
         setIdentityM(cube.getModelMatrix(), 0);
+        setIdentityM(model.getModelMatrix(), 0);
         scaleM(cube.getModelMatrix(), 0, 0.5f, 0.5f, 0.5f);
+        scaleM(model.getModelMatrix(), 0, 3f, 3f, 3f);
 
         setIdentityM(cube2.getModelMatrix(), 0);
         scaleM(cube2.getModelMatrix(), 0, 0.5f, 0.5f, 0.5f);
@@ -113,7 +115,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         textureShaderProgram.useProgram();
         cube.bindShader(textureShaderProgram);
         textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
-        cube.draw();
+        //cube.draw();
+
+        model.rotateX(1.0f);
+        // cube.scale(2f);
+        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, model.getModelMatrix(), 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+
+
+        //triangle.draw(modelViewProjectionMatrix);
+        //square.draw(modelViewProjectionMatrix);
+        textureShaderProgram.useProgram();
+        model.bindShader(textureShaderProgram);
+        textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
+        model.draw();
         /*
         cube2.rotateZ(2f);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, cube2.getModelMatrix(), 0);
