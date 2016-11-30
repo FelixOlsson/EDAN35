@@ -12,6 +12,8 @@ import java.util.Scanner;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import static android.opengl.Matrix.setIdentityM;
+
 /**
  * Created by Felix on 2016-11-28.
  */
@@ -28,7 +30,7 @@ public class Model extends AbstractObject {
     private float uvCooords[];
 
     public Model() {
-
+        setIdentityM(modelMatrix, 0);
     }
 
 
@@ -88,7 +90,7 @@ public class Model extends AbstractObject {
 
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Error while reading shader resource: " + modelResourceId, e);
+                    "Error while loading model: " + modelResourceId, e);
         }
 
         ArrayList<Float> newCoords = new ArrayList<Float>();
@@ -101,8 +103,6 @@ public class Model extends AbstractObject {
             for(Float tf : tempCoords.get(i - 1)) {
                 newCoords.add(tf);
             }
-            System.out.println("index: " + i);
-            System.out.println("vertex" + tempCoords.get(i - 1));
         }
 
         for(Integer i : tempIndexTexCoords) {
@@ -121,45 +121,6 @@ public class Model extends AbstractObject {
         for(int i = 0; i < newUVCoords.size(); ++i) {
             arrResults2[i] = newUVCoords.get( i);
         }
-
-        float cubeCoords[] = {   // in counterclockwise order:
-            -1.0f,-1.0f,-1.0f, // triangle 1 : begin
-                    -1.0f,-1.0f, 1.0f,
-                    -1.0f, 1.0f, 1.0f, // triangle 1 : end
-                    1.0f, 1.0f,-1.0f, // triangle 2 : begin
-                    -1.0f,-1.0f,-1.0f,
-                    -1.0f, 1.0f,-1.0f, // triangle 2 : end
-                    1.0f,-1.0f, 1.0f,
-                    -1.0f,-1.0f,-1.0f,
-                    1.0f,-1.0f,-1.0f,
-                    1.0f, 1.0f,-1.0f,
-                    1.0f,-1.0f,-1.0f,
-                    -1.0f,-1.0f,-1.0f,
-                    -1.0f,-1.0f,-1.0f,
-                    -1.0f, 1.0f, 1.0f,
-                    -1.0f, 1.0f,-1.0f,
-                    1.0f,-1.0f, 1.0f,
-                    -1.0f,-1.0f, 1.0f,
-                    -1.0f,-1.0f,-1.0f,
-                    -1.0f, 1.0f, 1.0f,
-                    -1.0f,-1.0f, 1.0f,
-                    1.0f,-1.0f, 1.0f,
-                    1.0f, 1.0f, 1.0f,
-                    1.0f,-1.0f,-1.0f,
-                    1.0f, 1.0f,-1.0f,
-                    1.0f,-1.0f,-1.0f,
-                    1.0f, 1.0f, 1.0f,
-                    1.0f,-1.0f, 1.0f,
-                    1.0f, 1.0f, 1.0f,
-                    1.0f, 1.0f,-1.0f,
-                    -1.0f, 1.0f,-1.0f,
-                    1.0f, 1.0f, 1.0f,
-                    -1.0f, 1.0f,-1.0f,
-                    -1.0f, 1.0f, 1.0f,
-                    1.0f, 1.0f, 1.0f,
-                    -1.0f, 1.0f, 1.0f,
-                    1.0f,-1.0f, 1.0f
-        };
 
         vertexCoords = arrResults;
         uvCooords = arrResults2;

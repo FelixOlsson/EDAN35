@@ -44,6 +44,7 @@ import java.nio.FloatBuffer;
 
 /**
  * Created by felix on 22/11/2016.
+ * Test class - texture coordinates does not work properly!
  */
 public class Sphere extends AbstractObject {
 

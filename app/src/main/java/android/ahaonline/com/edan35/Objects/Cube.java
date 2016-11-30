@@ -5,16 +5,11 @@ package android.ahaonline.com.edan35.Objects;
  */
 
 import android.ahaonline.com.edan35.data.VertexBuffer;
-import android.ahaonline.com.edan35.programs.ShaderBuilder;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
-import android.ahaonline.com.edan35.data.banana;
 
-import java.nio.FloatBuffer;
-
-import static android.R.attr.data;
 import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
 import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
 
@@ -22,6 +17,7 @@ import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
 
 /**
  * Created by felix on 15/11/2016.
+ * Test class - a simple pre-determined cube
  */
 public class Cube extends AbstractObject{
     private VertexBuffer vertexBuffer;
@@ -41,9 +37,9 @@ public class Cube extends AbstractObject{
 
 
 
-    static float cubeCoords[] = android.ahaonline.com.edan35.data.banana.cubeVerts;
 
-    /*static float cubeCoords[] = {   // in counterclockwise order:
+
+    static float cubeCoords[] = {   // in counterclockwise order:
             -1.0f,-1.0f,-1.0f, // triangle 1 : begin
             -1.0f,-1.0f, 1.0f,
             -1.0f, 1.0f, 1.0f, // triangle 1 : end
@@ -80,7 +76,7 @@ public class Cube extends AbstractObject{
             1.0f, 1.0f, 1.0f,
             -1.0f, 1.0f, 1.0f,
             1.0f,-1.0f, 1.0f
-    };*/
+    };
 
     // Set color with red, gree, blue and alpha (opacity) values
    /* float colorCoords[] = {0.583f,  0.771f,  0.014f,
@@ -202,7 +198,7 @@ public class Cube extends AbstractObject{
 
     public void draw() {
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, android.ahaonline.com.edan35.data.banana.cubeNumVerts);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, cubeCoords.length);
     }
 }
 
