@@ -59,7 +59,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         model = new Model();
         model.loadModel(context, R.raw.cube2);
         shaderTestProgram = new ShaderTestProgram(context);
-        scaleM(model.getModelMatrix(), 0, 3f, 3f, 3f);
+        //scaleM(model.getModelMatrix(), 0, 3f, 3f, 3f);
+        model.scale(3f);
+        model.translate(1f,1f, -1f);
 
     }
 
@@ -83,13 +85,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
        // rotateM(viewMatrix, 0, -45, 0f, 1f, 0f);
 
 
-        textureShaderProgram.useProgram();
-        textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
 
         model.rotateX(1.0f);
-
+        //model.translate(1.0f, 1.0f, -1.0f);
+        model.transformMatrix();
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, model.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+
+        textureShaderProgram.useProgram();
+        textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
 
         textureShaderProgram.useProgram();
         model.bindShader(textureShaderProgram);
