@@ -32,6 +32,7 @@ public class TextureShaderProgram extends ShaderProgram {
     // Attribute locations
     private final int aPositionLocation;
     private final int aTextureCoordinateLocation;
+    private final int aNormalLocation;
 
     public TextureShaderProgram(Context context) {
 
@@ -45,6 +46,7 @@ public class TextureShaderProgram extends ShaderProgram {
         //Attributes
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
         aTextureCoordinateLocation = glGetAttribLocation(program, A_TEXTURE_COORDINATES);
+        aNormalLocation = glGetAttribLocation(program, A_NORMAL);
 
     }
 
@@ -66,6 +68,9 @@ public class TextureShaderProgram extends ShaderProgram {
     }
     public int getTextureCoordinatesAttributeLocation() {
         return  aTextureCoordinateLocation;
+    }
+    public int getNormalAttributeLocation() {
+        return aNormalLocation;
     }
 
 }

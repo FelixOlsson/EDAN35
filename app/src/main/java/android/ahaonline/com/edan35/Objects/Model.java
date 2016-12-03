@@ -23,11 +23,13 @@ public class Model extends AbstractObject {
     private VertexBuffer vertexBuffer;
     private VertexBuffer vertexBufferColor;
     private VertexBuffer vertexBufferCoords;
+    private VertexBuffer vertexBufferNormals;
 
     private Context context;
 
     private float vertexCoords[];
     private float uvCooords[];
+    private float normals[];
 
     public Model() {
         setIdentityM(modelMatrix, 0);
@@ -47,8 +49,10 @@ public class Model extends AbstractObject {
 
         ArrayList<ArrayList<Float>> tempCoords = new ArrayList<ArrayList<Float>>();
         ArrayList<ArrayList<Float>> tempTexCoords = new ArrayList<ArrayList<Float>>();
+        ArrayList<ArrayList<Float>> tempNormalCoords = new ArrayList<ArrayList<Float>>();
         ArrayList<Integer> tempIndexVerCoords = new ArrayList<Integer>();
         ArrayList<Integer> tempIndexTexCoords = new ArrayList<Integer>();
+        ArrayList<Integer> tempIndexNormCoords = new ArrayList<Integer>();
 
         try {
             BufferedReader bufferedReader = new BufferedReader(
@@ -66,17 +70,25 @@ public class Model extends AbstractObject {
                     }
 
                       tempTexCoords.add(temp1);
-                } else if(scanner.hasNext(f)) {
+                  } else if (scanner.hasNext(vn)) {
+                          scanner.next();
+                          ArrayList<Float> temp1 = new ArrayList<Float>();
+                          while(scanner.hasNext()) {
+                              temp1.add(Float.valueOf(scanner.next()));
+                          }
+
+                          tempNormalCoords.add(temp1);
+                  } else if(scanner.hasNext(f)) {
                       scanner.next();
                     while(scanner.hasNext()) {
                         String temp = scanner.next();
                         String test[] = temp.split("/");
                         tempIndexVerCoords.add(Integer.valueOf(test[0]));
                         tempIndexTexCoords.add(Integer.valueOf(test[1]));
-                        //tempIndexCoords.add(Integer.valueOf(test[2]));
+                        tempIndexNormCoords.add(Integer.valueOf(test[2]));
 
                     }
-                } else if(scanner.hasNext(v)) {
+                  } else if(scanner.hasNext(v)) {
                       scanner.next();
                       ArrayList<Float> temp1 = new ArrayList<Float>();
                       while(scanner.hasNext()) {
@@ -95,11 +107,10 @@ public class Model extends AbstractObject {
 
         ArrayList<Float> newCoords = new ArrayList<Float>();
         ArrayList<Float> newUVCoords = new ArrayList<Float>();
+        ArrayList<Float> newNormCoords = new ArrayList<Float>();
 
 
-        System.out.println(tempCoords.size());
         for(Integer i : tempIndexVerCoords) {
-
             for(Float tf : tempCoords.get(i - 1)) {
                 newCoords.add(tf);
             }
@@ -108,6 +119,12 @@ public class Model extends AbstractObject {
         for(Integer i : tempIndexTexCoords) {
             for(Float tf : tempTexCoords.get(i - 1)) {
                 newUVCoords.add(tf);
+            }
+        }
+
+        for(Integer i : tempIndexNormCoords) {
+            for(Float tf : tempNormalCoords.get(i - 1)) {
+                newNormCoords.add(tf);
             }
         }
         float[] arrResults = new float[newCoords.size()];
@@ -122,16 +139,23 @@ public class Model extends AbstractObject {
             arrResults2[i] = newUVCoords.get( i);
         }
 
+        float[] arrResults3 = new float[newNormCoords.size()];
+
+        for(int i = 0; i < newNormCoords.size(); ++i) {
+            arrResults3[i] = newNormCoords.get( i);
+        }
+
         vertexCoords = arrResults;
         uvCooords = arrResults2;
+        normals = arrResults3;
 
         vertexBuffer = new VertexBuffer(vertexCoords);
         // vertexBufferColor = new VertexBuffer(colorCoords);
         vertexBufferCoords = new VertexBuffer(uvCooords);
+        vertexBufferNormals = new VertexBuffer(normals);
     }
 
     public void bindShader(TextureShaderProgram shaderTestProgram) {
-        //GLES20.glUseProgram(program);
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
                 3, 0);
@@ -140,7 +164,9 @@ public class Model extends AbstractObject {
                 shaderTestProgram.getTextureCoordinatesAttributeLocation(),
                 2, 0);
 
-
+        vertexBufferNormals.setVertexAttribPointer(0,
+                shaderTestProgram.getNormalAttributeLocation(),
+                3, 0);
     }
 
     public void draw() {
