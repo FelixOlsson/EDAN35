@@ -4,22 +4,18 @@ import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Vector;
 import java.util.regex.Pattern;
-
-import static android.opengl.Matrix.setIdentityM;
 
 /**
  * Created by Felix on 2016-11-28.
  */
 
-public class Model extends AbstractObject {
+public class Model extends transformController {
 
     private VertexBuffer vertexBuffer;
     private VertexBuffer vertexBufferColor;
@@ -33,7 +29,7 @@ public class Model extends AbstractObject {
     private float normals[];
 
     public Model() {
-        setIdentityM(modelMatrix, 0);
+        super();
     }
 
 
@@ -46,12 +42,11 @@ public class Model extends AbstractObject {
         Pattern vn = Pattern.compile("vn");
         Pattern v = Pattern.compile("v");
         Pattern f = Pattern.compile("f");
-        Pattern not = Pattern.compile("/");
 
-        ArrayList<ArrayList<Float>> tempCoords = new ArrayList<ArrayList<Float>>();
+        ArrayList<ArrayList<Float>> tempVertCoords = new ArrayList<ArrayList<Float>>();
         ArrayList<ArrayList<Float>> tempTexCoords = new ArrayList<ArrayList<Float>>();
-        ArrayList<ArrayList<Float>> tempNormalCoords = new ArrayList<ArrayList<Float>>();
-        ArrayList<Integer> tempIndexVerCoords = new ArrayList<Integer>();
+        ArrayList<ArrayList<Float>> tempNormCoords = new ArrayList<ArrayList<Float>>();
+        ArrayList<Integer> tempIndexVertCoords = new ArrayList<Integer>();
         ArrayList<Integer> tempIndexTexCoords = new ArrayList<Integer>();
         ArrayList<Integer> tempIndexNormCoords = new ArrayList<Integer>();
 
@@ -80,13 +75,13 @@ public class Model extends AbstractObject {
                               temp1.add(Float.valueOf(scanner.next()));
                           }
 
-                          tempNormalCoords.add(temp1);
+                          tempNormCoords.add(temp1);
                   } else if(scanner.hasNext(f)) {
                       scanner.next();
                     while(scanner.hasNext()) {
                         String temp = scanner.next();
                         String test[] = temp.split("/");
-                        tempIndexVerCoords.add(Integer.valueOf(test[0]));
+                        tempIndexVertCoords.add(Integer.valueOf(test[0]));
                         tempIndexTexCoords.add(Integer.valueOf(test[1]));
                         tempIndexNormCoords.add(Integer.valueOf(test[2]));
 
@@ -98,7 +93,7 @@ public class Model extends AbstractObject {
                           temp1.add(Float.valueOf(scanner.next()));
                       }
 
-                      tempCoords.add(temp1);
+                      tempVertCoords.add(temp1);
                 }
 
             }
@@ -109,9 +104,9 @@ public class Model extends AbstractObject {
         }
 
 
-        vertexCoords = toFloatArray(toIndexedArrayList(tempIndexVerCoords, tempCoords));
+        vertexCoords = toFloatArray(toIndexedArrayList(tempIndexVertCoords, tempVertCoords));
         uvCooords = toFloatArray(toIndexedArrayList(tempIndexTexCoords, tempTexCoords));
-        normals = toFloatArray(toIndexedArrayList(tempIndexNormCoords, tempNormalCoords));
+        normals = toFloatArray(toIndexedArrayList(tempIndexNormCoords, tempNormCoords));
 
         vertexBuffer = new VertexBuffer(vertexCoords);
         vertexBufferCoords = new VertexBuffer(uvCooords);
@@ -136,7 +131,7 @@ public class Model extends AbstractObject {
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,vertexCoords.length);
     }
 
-    public float[] toFloatArray(ArrayList<Float> arrayList) {
+    private float[] toFloatArray(ArrayList<Float> arrayList) {
         float[] arrayOfFloats = new float[arrayList.size()];
 
         for(int i = 0; i < arrayList.size(); ++i) {
@@ -146,7 +141,7 @@ public class Model extends AbstractObject {
         return arrayOfFloats;
     }
 
-    public ArrayList<Float> toIndexedArrayList(ArrayList<Integer> index, ArrayList<ArrayList<Float>> al) {
+    private ArrayList<Float> toIndexedArrayList(ArrayList<Integer> index, ArrayList<ArrayList<Float>> al) {
         ArrayList<Float> newIndexedList = new ArrayList<Float>();
 
         for(Integer i : index) {

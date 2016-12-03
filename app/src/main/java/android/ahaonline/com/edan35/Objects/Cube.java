@@ -19,7 +19,7 @@ import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
  * Created by felix on 15/11/2016.
  * Test class - a simple pre-determined cube
  */
-public class Cube extends AbstractObject{
+public class Cube extends transformController {
     private VertexBuffer vertexBuffer;
     private VertexBuffer vertexBufferColor;
     private VertexBuffer vertexBufferCoords;

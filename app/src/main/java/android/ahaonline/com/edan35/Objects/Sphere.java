@@ -1,52 +1,31 @@
 package android.ahaonline.com.edan35.Objects;
 
 import android.ahaonline.com.edan35.Constants;
-import android.ahaonline.com.edan35.R;
-import android.ahaonline.com.edan35.data.IndexBuffer;
 import android.ahaonline.com.edan35.data.VertexBuffer;
-import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
-import android.util.FloatMath;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 
-import javax.microedition.khronos.opengles.GL10;
-
-import static android.R.attr.x;
-import static android.R.attr.y;
-import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
 import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
-import static android.ahaonline.com.edan35.Objects.Cube.cubeCoords;
 import static android.opengl.GLES20.GL_ELEMENT_ARRAY_BUFFER;
-import static android.opengl.GLES20.GL_SHORT;
-import static android.opengl.GLES20.GL_STATIC_DRAW;
 import static android.opengl.GLES20.GL_STREAM_DRAW;
 import static android.opengl.GLES20.GL_TRIANGLES;
-import static android.opengl.GLES20.GL_UNSIGNED_BYTE;
 import static android.opengl.GLES20.GL_UNSIGNED_INT;
-import static android.opengl.GLES20.GL_UNSIGNED_SHORT;
 import static android.opengl.GLES20.glBindBuffer;
 import static android.opengl.GLES20.glBufferData;
 import static android.opengl.GLES20.glDrawElements;
 import static android.opengl.GLES20.glGenBuffers;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 
 
 /**
  * Created by felix on 22/11/2016.
  * Test class - texture coordinates does not work properly!
  */
-public class Sphere extends AbstractObject {
+public class Sphere extends transformController {
 
     private float[] vertices;
     private float[] normals;

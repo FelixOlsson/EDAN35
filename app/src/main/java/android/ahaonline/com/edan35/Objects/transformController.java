@@ -1,24 +1,28 @@
 package android.ahaonline.com.edan35.Objects;
 
-import android.opengl.Matrix;
-
-import static android.R.attr.rotation;
-import static android.R.attr.x;
 import static android.opengl.Matrix.rotateM;
 import static android.opengl.Matrix.scaleM;
+import static android.opengl.Matrix.setIdentityM;
 import static android.opengl.Matrix.translateM;
 
 /**
  * Created by Felix on 2016-11-21.
  */
 
-public class AbstractObject {
-    protected float x, y, z;
-    protected float rotationX, rotationY, rotationZ;
-    protected final float[] modelMatrix = new float[16];
-    protected float tX, tY, tZ;
-    protected float tRotationX, tRotationY, tRotationZ;
-    protected float tSizeX = 1, tSizeY = 1, tSizeZ = 1;
+public class transformController {
+
+    private float x, y, z;
+    private float rotationX, rotationY, rotationZ;
+    private final float[] modelMatrix = new float[16];
+
+    //temporary values
+    private float tX, tY, tZ;
+    private float tRotationX, tRotationY, tRotationZ;
+    private float tSizeX = 1, tSizeY = 1, tSizeZ = 1;
+
+    public transformController() {
+        setIdentityM(modelMatrix, 0);
+    }
 
 
     public void translate(float x, float y, float z) {
@@ -86,6 +90,10 @@ public class AbstractObject {
         rotateM(modelMatrix, 0, tRotationZ, 0f, 0f, 1f);
         translateM(modelMatrix, 0, tX, tY, tZ);
 
+        resetValues();
+    }
+
+    private void resetValues() {
         tSizeX = 1;
         tSizeY = 1;
         tSizeZ = 1;
@@ -98,7 +106,6 @@ public class AbstractObject {
         tY = 0;
         tZ = 0;
     }
-
 
 
 }
