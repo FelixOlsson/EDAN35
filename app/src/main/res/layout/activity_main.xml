@@ -7,6 +7,15 @@
     android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen"
     tools:context="android.ahaonline.com.edan35.MainActivity">
 
+    <Button
+        android:text="Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="31dp"
+        android:id="@+id/button" />
 </RelativeLayout>
 
 

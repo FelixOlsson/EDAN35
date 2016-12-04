@@ -25,18 +25,8 @@ public class MainActivity extends AppCompatActivity {
         loading_dialog.setContentView(R.layout.loader);
         loading_dialog.show();
 
-        //You would have already setContentView to your GLRenderer earlier in
-        //onCreate, this just goes over the top of it
-
-        //Get object to renderer class and pass in dialogue through constructor
 
         final MyGLRenderer mRenderer = new MyGLRenderer(this, loading_dialog);
-       /* mGLView = new GLSurfaceView(this);
-
-
-
-        mGLView.setRenderer(mRenderer);*/
-
         setContentView(R.layout.activity_main);
         RelativeLayout r = (RelativeLayout) findViewById(R.id.activity_main);
         mGLView = new GLSurfaceView(this);
