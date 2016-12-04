@@ -9,6 +9,7 @@ import android.ahaonline.com.edan35.programs.ShaderProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
+import android.app.Dialog;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -41,6 +42,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private TextureShaderProgram textureShaderProgram;
     private Model model;
     private Light light;
+    private Dialog loadScreen;
 
     private int texture;
 
@@ -52,7 +54,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] transposdMatrix = new float[16];
     private final float[] inversedMatrix = new float[16];
 
-    public MyGLRenderer(Context context) { this.context = context; }
+    public MyGLRenderer(Context context, Dialog loadScreen) {
+        this.context = context;
+        this.loadScreen = loadScreen;
+    }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -71,6 +76,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         light = new Light();
         model.scale(3f);
         model.translate(1f,1f, -1f);
+        loadScreen.dismiss();
 
     }
 

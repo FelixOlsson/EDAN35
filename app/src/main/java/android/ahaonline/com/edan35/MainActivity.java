@@ -1,28 +1,48 @@
 package android.ahaonline.com.edan35;
 
-import android.content.Context;
+import android.app.Dialog;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 public class MainActivity extends AppCompatActivity {
 
     private GLSurfaceView mGLView;
+    private int width;
+    private int height;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final MyGLRenderer mRenderer = new MyGLRenderer(this);
+
+        Dialog loading_dialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        loading_dialog.create();
+        loading_dialog.setContentView(R.layout.loader);
+        loading_dialog.show();
+
+        //You would have already setContentView to your GLRenderer earlier in
+        //onCreate, this just goes over the top of it
+
+        //Get object to renderer class and pass in dialogue through constructor
+
+        final MyGLRenderer mRenderer = new MyGLRenderer(this, loading_dialog);
+       /* mGLView = new GLSurfaceView(this);
+
+
+
+        mGLView.setRenderer(mRenderer);*/
+
+        setContentView(R.layout.activity_main);
+        RelativeLayout r = (RelativeLayout) findViewById(R.id.activity_main);
         mGLView = new GLSurfaceView(this);
-
         mGLView.setEGLContextClientVersion(2);
-
         mGLView.setRenderer(mRenderer);
-
-
+        r.addView(mGLView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         mGLView.setOnTouchListener(new View.OnTouchListener() {
             float previousX, previousY;
@@ -58,7 +78,8 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        setContentView(mGLView);
+
+
     }
 
 
@@ -74,4 +95,5 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
             mGLView.onResume();
     }
+
 }
