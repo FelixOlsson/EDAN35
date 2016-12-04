@@ -1,8 +1,11 @@
 package android.ahaonline.com.edan35;
 
 import android.ahaonline.com.edan35.Objects.Cube;
+import android.ahaonline.com.edan35.Objects.Light;
 import android.ahaonline.com.edan35.Objects.Model;
 import android.ahaonline.com.edan35.Objects.Sphere;
+import android.ahaonline.com.edan35.programs.ShaderLightProgram;
+import android.ahaonline.com.edan35.programs.ShaderProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
@@ -34,16 +37,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
     private ShaderTestProgram shaderTestProgram;
+    private ShaderLightProgram shaderLightProgram;
     private TextureShaderProgram textureShaderProgram;
     private Model model;
+    private Light light;
 
     private int texture;
 
-    // modelViewProjectionMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] modelViewProjectionMatrix = new float[16];
     private final float[] projectionMatrix = new float[16];
     private final float[] viewMatrix = new float[16];
     private final float[] modelViewMatrix = new float[16];
+    private final float[] normalMatrix = new float[16];
+    private final float[] transposdMatrix = new float[16];
+    private final float[] inversedMatrix = new float[16];
 
     public MyGLRenderer(Context context) { this.context = context; }
 
@@ -59,7 +66,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         model = new Model();
         model.loadModel(context, R.raw.cube2);
         shaderTestProgram = new ShaderTestProgram(context);
+        shaderLightProgram = new ShaderLightProgram(context);
         //scaleM(model.getModelMatrix(), 0, 3f, 3f, 3f);
+        light = new Light();
         model.scale(3f);
         model.translate(1f,1f, -1f);
 
@@ -84,6 +93,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         //rotateM(viewMatrix, 0, -45, 1f, 0f, 0f);
        // rotateM(viewMatrix, 0, -45, 0f, 1f, 0f);
 
+        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, light.getModelMatrix(), 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+        shaderLightProgram.useProgram();
+        light.bindShader(shaderLightProgram);
+        shaderLightProgram.setUniforms(modelViewProjectionMatrix);
+        light.draw();
 
 
         model.rotateX(1.0f);
@@ -94,12 +110,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 
         textureShaderProgram.useProgram();
-        textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
-
-        textureShaderProgram.useProgram();
         model.bindShader(textureShaderProgram);
-        textureShaderProgram.setUniforms(modelViewProjectionMatrix, texture);
+        Matrix.invertM(inversedMatrix, 0, model.getModelMatrix(), 0);
+        Matrix.transposeM(normalMatrix, 0, inversedMatrix, 0);
+        textureShaderProgram.setUniforms(modelViewProjectionMatrix, model.getModelMatrix(), texture, light, normalMatrix);
         model.draw();
+
+
+
 
 
     }

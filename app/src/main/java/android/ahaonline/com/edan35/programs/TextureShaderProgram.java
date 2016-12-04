@@ -1,5 +1,7 @@
 package android.ahaonline.com.edan35.programs;
 
+import android.ahaonline.com.edan35.Objects.Light;
+import android.ahaonline.com.edan35.Objects.Model;
 import android.ahaonline.com.edan35.R;
 import android.content.Context;
 
@@ -15,7 +17,9 @@ import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glUniform1f;
 import static android.opengl.GLES20.glUniform1i;
+import static android.opengl.GLES20.glUniform3f;
 import static android.opengl.GLES20.glUniform4fv;
+import static android.opengl.GLES20.glUniformMatrix3fv;
 import static android.opengl.GLES20.glUniformMatrix4fv;
 
 /**
@@ -26,7 +30,10 @@ public class TextureShaderProgram extends ShaderProgram {
 
     // Unifrom locations
     private final int uMVPMatrixLocation;
+    private final int uMMatrixLocation;
     private final int uTextureUnitLocation;
+    private final int uLightPosLocation;
+    private final int uNormalMatrixLocation;
 
 
     // Attribute locations
@@ -41,7 +48,11 @@ public class TextureShaderProgram extends ShaderProgram {
 
         //Uniforms
         uMVPMatrixLocation = glGetUniformLocation(program, U_MVP_MATRIX);
+        uMMatrixLocation = glGetUniformLocation(program, U_M_MATRIX);
         uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
+        uLightPosLocation = glGetUniformLocation(program, U_LIGHT_POS);
+        uNormalMatrixLocation = glGetUniformLocation(program, U_NORMAL_MATRIX);
+
 
         //Attributes
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
@@ -50,9 +61,12 @@ public class TextureShaderProgram extends ShaderProgram {
 
     }
 
-    public void setUniforms(float[] mvpMatrix, int textureid) {
+    public void setUniforms(float[] mvpMatrix, float[] mMatrix, int textureid, Light light, float[] normal) {
         //glUseProgram(program);
         glUniformMatrix4fv(uMVPMatrixLocation, 1, false, mvpMatrix, 0);
+        glUniformMatrix4fv(uMMatrixLocation, 1, false, mMatrix, 0);
+        glUniform3f(uLightPosLocation, light.getX(), light.getY(), light.getZ());
+        glUniformMatrix4fv(uNormalMatrixLocation, 1, false, normal, 0);
 
         glActiveTexture(GL_TEXTURE0);
 

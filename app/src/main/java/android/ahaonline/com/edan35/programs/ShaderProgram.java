@@ -16,8 +16,13 @@ public class ShaderProgram {
     protected static final String U_TIME = "u_Time";
     protected static final String U_VECTOR_TO_LIGHT = "u_VectorToLight";
     protected static final String U_MV_MATRIX = "u_MVMatrix";
+    protected static final String U_M_MATRIX = "u_MMatrix";
+    protected static final String U_V_MATRIX = "u_VMatrix";
+    protected static final String U_P_MATRIX = "u_PMatrix";
     protected static final String U_IT_MV_MATRIX = "u_IT_MVMatrix";
     protected static final String U_MVP_MATRIX = "u_MVPMatrix";
+    protected static final String U_NORMAL_MATRIX = "u_NormalMatrix";
+    protected static final String U_LIGHT_POS = "u_LightPos";
     protected static final String U_POINT_LIGHT_POSITIONS =
             "u_PointLightPositions";
     protected static final String U_POINT_LIGHT_COLORS = "u_PointLightColors";

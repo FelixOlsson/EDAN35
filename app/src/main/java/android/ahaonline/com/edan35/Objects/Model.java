@@ -4,6 +4,7 @@ import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -128,7 +129,7 @@ public class Model extends transformController {
     }
 
     public void draw() {
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,vertexCoords.length);
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0,vertexCoords.length);
     }
 
     private float[] toFloatArray(ArrayList<Float> arrayList) {
