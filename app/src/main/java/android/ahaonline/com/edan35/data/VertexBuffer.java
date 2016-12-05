@@ -1,5 +1,7 @@
 package android.ahaonline.com.edan35.data;
 
+import android.opengl.GLUtils;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -35,6 +37,7 @@ public class VertexBuffer {
 
         // Bind to the buffer.
         glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+
 
         FloatBuffer vertexArray = ByteBuffer
                 .allocateDirect(vertexData.length * BYTES_PER_FLOAT)
