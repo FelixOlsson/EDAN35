@@ -4,7 +4,6 @@ import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import android.opengl.GLES20;
-import android.opengl.GLES30;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -104,7 +103,7 @@ public class Model extends transformController {
                     "Error while loading model: " + modelResourceId, e);
         }
 
-
+        //Performance could be improved by combining all of the data into one buffer and by using a VAO
         vertexCoords = toFloatArray(toIndexedArrayList(tempIndexVertCoords, tempVertCoords));
         uvCooords = toFloatArray(toIndexedArrayList(tempIndexTexCoords, tempTexCoords));
         normals = toFloatArray(toIndexedArrayList(tempIndexNormCoords, tempNormCoords));
@@ -126,12 +125,19 @@ public class Model extends transformController {
         vertexBufferNormals.setVertexAttribPointer(0,
                 shaderTestProgram.getNormalAttributeLocation(),
                 3, 0);
+
+
     }
 
     public void draw() {
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0,vertexCoords.length);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCoords.length);
     }
 
+    /**
+     *
+     * @param arrayList
+     * @return float[]
+     */
     private float[] toFloatArray(ArrayList<Float> arrayList) {
         float[] arrayOfFloats = new float[arrayList.size()];
 
@@ -142,6 +148,12 @@ public class Model extends transformController {
         return arrayOfFloats;
     }
 
+    /**
+     *
+     * @param index
+     * @param al
+     * @return ArrayList<Float>
+     */
     private ArrayList<Float> toIndexedArrayList(ArrayList<Integer> index, ArrayList<ArrayList<Float>> al) {
         ArrayList<Float> newIndexedList = new ArrayList<Float>();
 

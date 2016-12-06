@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_FLOAT;
 import static android.opengl.GLES20.GL_STATIC_DRAW;
@@ -22,7 +23,6 @@ public class VertexBuffer {
 
     private final int bufferId;
 
-    private final int BYTES_PER_FLOAT = 4;
 
 
     public VertexBuffer(float[] vertexData) {
@@ -30,6 +30,7 @@ public class VertexBuffer {
         // Allocate a buffer.
         final int buffers[] = new int[1];
         glGenBuffers(buffers.length, buffers, 0);
+
         if(buffers[0] == 0) {
             throw new RuntimeException("Could not create a new vertex buffer object.");
         }
@@ -50,16 +51,26 @@ public class VertexBuffer {
         glBufferData(GL_ARRAY_BUFFER, vertexArray.capacity() * BYTES_PER_FLOAT,
                 vertexArray, GL_STATIC_DRAW);
 
-        // IMPORTANT: Unbind from buffer when we're done with it
+        // Unbinding the buffer
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
+    /**
+     * @param dataOffset
+     * @param attributeLocation
+     * @param componentCount
+     * @param stride
+     */
     public void setVertexAttribPointer(int dataOffset, int attributeLocation,
                                        int componentCount, int stride) {
+        //Rebinding the buffer
         glBindBuffer(GL_ARRAY_BUFFER, bufferId);
+
         glVertexAttribPointer(attributeLocation, componentCount, GL_FLOAT,
                 false, stride, dataOffset);
         glEnableVertexAttribArray(attributeLocation);
+
+        //Unbinding the buffer
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 }

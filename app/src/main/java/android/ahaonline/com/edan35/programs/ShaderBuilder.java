@@ -3,6 +3,7 @@ package android.ahaonline.com.edan35.programs;
 import android.content.Context;
 import android.util.Log;
 
+import static android.content.ContentValues.TAG;
 import static android.opengl.GLES20.GL_COMPILE_STATUS;
 import static android.opengl.GLES20.GL_FRAGMENT_SHADER;
 import static android.opengl.GLES20.GL_LINK_STATUS;
@@ -55,6 +56,8 @@ public class ShaderBuilder {
             // Compile the shader.
             glCompileShader(shaderObjectId);
 
+
+
             // Get the compilation status.
             final int[] compileStatus = new int[1];
             glGetShaderiv(shaderObjectId, GL_COMPILE_STATUS, compileStatus, 0);
@@ -63,6 +66,7 @@ public class ShaderBuilder {
             // Verify the compile status.
             if (compileStatus[0] == 0) {
                 // If it failed, delete the shader object.
+                Log.v(TAG, "Error:"  + glGetShaderInfoLog(shaderObjectId));
                 glDeleteShader(shaderObjectId);
                 return 0;
             }
@@ -97,6 +101,7 @@ public class ShaderBuilder {
             // Verify the link status.
             if (linkStatus[0] == 0) {
                 // If it failed, delete the program object.
+                Log.v(TAG, "Error:"  + glGetProgramInfoLog(programObjectId));
                 glDeleteProgram(programObjectId);
 
                 return 0;
@@ -115,6 +120,8 @@ public class ShaderBuilder {
             int fragmentShader = compileFragmentShader(fragmentShaderSource);
             // Link them into a shader program.
             program = linkProgram(vertexShader, fragmentShader);
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
 
             return program;
         }
