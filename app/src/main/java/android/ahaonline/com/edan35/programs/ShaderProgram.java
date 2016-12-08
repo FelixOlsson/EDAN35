@@ -3,7 +3,7 @@ package android.ahaonline.com.edan35.programs;
 import android.ahaonline.com.edan35.ShaderResourceReader;
 import android.content.Context;
 
-import static android.opengl.GLES20.glUseProgram;
+import static android.opengl.GLES30.*;
 
 /**
  * Created by felix on 18/11/2016.

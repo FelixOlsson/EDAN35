@@ -1,26 +1,25 @@
 package android.ahaonline.com.edan35;
 
-import android.ahaonline.com.edan35.Objects.Cube;
 import android.ahaonline.com.edan35.Objects.Light;
 import android.ahaonline.com.edan35.Objects.Model;
-import android.ahaonline.com.edan35.Objects.Sphere;
+import android.ahaonline.com.edan35.Objects.SkyBox;
 import android.ahaonline.com.edan35.programs.ShaderLightProgram;
-import android.ahaonline.com.edan35.programs.ShaderProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
+import android.ahaonline.com.edan35.programs.SkyBoxShaderProgram;
 import android.ahaonline.com.edan35.programs.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.app.Dialog;
 import android.content.Context;
-import android.opengl.GLES20;
+import static android.opengl.GLES30.*;
+
+
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import static android.R.attr.mode;
-import static android.opengl.GLES20.GL_CULL_FACE;
-import static android.opengl.GLES20.GL_DEPTH_TEST;
+
 import static android.opengl.Matrix.multiplyMM;
 import static android.opengl.Matrix.rotateM;
 import static android.opengl.Matrix.scaleM;
@@ -44,8 +43,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Light light;
     private Dialog loadScreen;
 
-    private int texture;
+    private float xRotation, yRotation;
 
+    private SkyBoxShaderProgram skyboxProgram;
+    private SkyBox skybox;
+    private int skyboxTexture;
+
+    private int texture;
+    private int rotationtemp = 0;
     private final float[] modelViewProjectionMatrix = new float[16];
     private final float[] projectionMatrix = new float[16];
     private final float[] viewMatrix = new float[16];
@@ -53,6 +58,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] normalMatrix = new float[16];
     private final float[] transposdMatrix = new float[16];
     private final float[] inversedMatrix = new float[16];
+    private final float[] viewProjectionMatrix = new float[16];
 
     public MyGLRenderer(Context context, Dialog loadScreen) {
         this.context = context;
@@ -62,10 +68,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         // Set the background frame color
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        GLES20.glEnable(GL_CULL_FACE);
-        GLES20.glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
         textureShaderProgram = new TextureShaderProgram(context);
         texture = TextureHelper.loadTexture(context, R.drawable.earth);
         model = new Model();
@@ -76,13 +82,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         light = new Light();
         model.scale(3f);
         model.translate(1f,1f, -1f);
+
+        skyboxProgram = new SkyBoxShaderProgram(context);
+        skybox = new SkyBox();
+        skyboxTexture = TextureHelper.loadCubeMap(context,
+                new int[] { R.drawable.spacelf, R.drawable.spacert,
+                        R.drawable.spaceup, R.drawable.spacedn,
+                         R.drawable.spaceft, R.drawable.spacebk});
+
+
         loadScreen.dismiss();
+
+
 
     }
 
     @Override
     public void onSurfaceChanged(GL10 unued, int width, int height) {
-        GLES20.glViewport(0, 0, width, height);
+        glViewport(0, 0, width, height);
 
         float ratio = (float) width / height;
 
@@ -92,12 +109,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(viewMatrix, 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         //rotateM(viewMatrix, 0, -45, 1f, 0f, 0f);
-       // rotateM(viewMatrix, 0, -45, 0f, 1f, 0f);
+        //rotateM(viewMatrix, 0, -180, 0f, 1f, 0f);
 
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, light.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
@@ -122,6 +139,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         textureShaderProgram.setUniforms(modelViewProjectionMatrix, model.getModelMatrix(), texture, light, normalMatrix);
         model.draw();
 
+        drawSkybox();
 
 
 
@@ -129,7 +147,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public void handleTouchDrag(float deltaX, float deltaY) {
+        xRotation += deltaX / 16f;
+        yRotation += deltaY / 16f;
+        if (yRotation < -90) {
+            yRotation = -90;
+        } else if (yRotation > 90) {
+            yRotation = 90;
+        }
+    }
 
+    private void drawSkybox() {
+        setIdentityM(viewMatrix, 0);
+        rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
+        rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        skyboxProgram.useProgram();
+        skyboxProgram.setUniforms(viewProjectionMatrix, skyboxTexture);
+        skybox.bindData(skyboxProgram);
+        skybox.draw();
     }
 
 

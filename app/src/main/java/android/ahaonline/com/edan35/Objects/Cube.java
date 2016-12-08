@@ -8,7 +8,7 @@ import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
-import android.opengl.GLES20;
+import static android.opengl.GLES30.*;
 
 import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
 import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
@@ -171,7 +171,7 @@ public class Cube extends transformController {
     }
 
     public void bindShader(ShaderTestProgram shaderTestProgram) {
-        //GLES20.glUseProgram(program);
+
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
                 COORDS_PER_VERTEX, 0);
@@ -184,7 +184,7 @@ public class Cube extends transformController {
     }
 
     public void bindShader(TextureShaderProgram shaderTestProgram) {
-        //GLES20.glUseProgram(program);
+
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
                 3, 0);
@@ -198,7 +198,7 @@ public class Cube extends transformController {
 
     public void draw() {
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, cubeCoords.length);
+        glDrawArrays(GL_TRIANGLES, 0, cubeCoords.length);
     }
 }
 

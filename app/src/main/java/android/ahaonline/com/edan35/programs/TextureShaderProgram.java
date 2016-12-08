@@ -9,19 +9,8 @@ import static android.ahaonline.com.edan35.programs.ShaderProgram.A_COLOR;
 import static android.ahaonline.com.edan35.programs.ShaderProgram.A_POSITION;
 import static android.ahaonline.com.edan35.programs.ShaderProgram.U_COLOR;
 import static android.ahaonline.com.edan35.programs.ShaderProgram.U_MVP_MATRIX;
-import static android.opengl.GLES20.GL_TEXTURE0;
-import static android.opengl.GLES20.GL_TEXTURE_2D;
-import static android.opengl.GLES20.glActiveTexture;
-import static android.opengl.GLES20.glBindTexture;
-import static android.opengl.GLES20.glGetAttribLocation;
-import static android.opengl.GLES20.glGetUniformLocation;
-import static android.opengl.GLES20.glUniform1f;
-import static android.opengl.GLES20.glUniform1i;
-import static android.opengl.GLES20.glUniform3f;
-import static android.opengl.GLES20.glUniform4fv;
-import static android.opengl.GLES20.glUniformMatrix3fv;
-import static android.opengl.GLES20.glUniformMatrix4fv;
 
+import static android.opengl.GLES30.*;
 /**
  * Created by Felix on 2016-11-24.
  */

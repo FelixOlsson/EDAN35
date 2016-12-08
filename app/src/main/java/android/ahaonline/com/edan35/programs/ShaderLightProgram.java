@@ -3,10 +3,8 @@ package android.ahaonline.com.edan35.programs;
 import android.ahaonline.com.edan35.R;
 import android.content.Context;
 
-import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
-import static android.opengl.GLES20.glUniform4fv;
-import static android.opengl.GLES20.glUniformMatrix4fv;
+import static android.opengl.GLES30.*;
 
 /**
  * Created by Felix on 2016-12-04.
