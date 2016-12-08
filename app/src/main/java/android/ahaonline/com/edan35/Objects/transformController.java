@@ -16,8 +16,8 @@ public class transformController {
     private final float[] modelMatrix = new float[16];
 
     //temporary values
-    private float tX, tY, tZ;
-    private float tRotationX, tRotationY, tRotationZ;
+    private float tX = 0, tY = 0, tZ = 0;
+    private float tRotationX = 0, tRotationY = 0, tRotationZ = 0;
     private float tSizeX = 1, tSizeY = 1, tSizeZ = 1;
 
     public transformController() {
@@ -56,15 +56,15 @@ public class transformController {
     }
 
     public void scaleX(float size) {
-        tSizeX = size;
+        tSizeX += size;
     }
 
     public void scaleY(float size) {
-        tSizeY = size;
+        tSizeY += size;
     }
 
     public void scaleZ(float size) {
-        tSizeZ = size;
+        tSizeZ += size;
     }
 
     public float getX() {

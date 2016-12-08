@@ -15,6 +15,8 @@ import static android.opengl.GLES30.*;
 
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.SystemClock;
+import android.provider.Settings;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -56,9 +58,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] viewMatrix = new float[16];
     private final float[] modelViewMatrix = new float[16];
     private final float[] normalMatrix = new float[16];
+    private final float[] normalViewMatrix = new float[16];
     private final float[] transposdMatrix = new float[16];
     private final float[] inversedMatrix = new float[16];
+    private final float[] inversedViewMatrix = new float[16];
     private final float[] viewProjectionMatrix = new float[16];
+
+    float deltaTime = 0.0f;	// Time between current frame and last frame
+    float lastFrameTime = 0.0f;
 
     public MyGLRenderer(Context context, Dialog loadScreen) {
         this.context = context;
@@ -81,7 +88,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         //scaleM(model.getModelMatrix(), 0, 3f, 3f, 3f);
         light = new Light();
         model.scale(3f);
-        model.translate(1f,1f, -1f);
+        model.translate(1f,1f, -2f);
 
         skyboxProgram = new SkyBoxShaderProgram(context);
         skybox = new SkyBox();
@@ -103,7 +110,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         float ratio = (float) width / height;
 
-        Matrix.perspectiveM(projectionMatrix, 0, 45f, ratio, 3f, 100f);
+        Matrix.perspectiveM(projectionMatrix, 0, 45f, ratio, 0.1f, 100f);
 
     }
 
@@ -111,8 +118,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 unused) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
         // Set the camera position (View matrix)
         Matrix.setLookAtM(viewMatrix, 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        //translateM(viewMatrix, 0, 0, 0 ,-15f);
         //rotateM(viewMatrix, 0, -45, 1f, 0f, 0f);
         //rotateM(viewMatrix, 0, -180, 0f, 1f, 0f);
 
@@ -125,8 +134,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         light.draw();
 
 
-        model.rotateX(1.0f);
-        //model.translate(1.0f, 1.0f, -1.0f);
+        model.rotateX(3.5f);
+
         model.transformMatrix();
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, model.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
@@ -134,12 +143,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         textureShaderProgram.useProgram();
         model.bindShader(textureShaderProgram);
+       // Matrix.setIdentityM(inversedMatrix, 0);
+        //Matrix.setIdentityM(normalMatrix, 0);
         Matrix.invertM(inversedMatrix, 0, model.getModelMatrix(), 0);
         Matrix.transposeM(normalMatrix, 0, inversedMatrix, 0);
-        textureShaderProgram.setUniforms(modelViewProjectionMatrix, model.getModelMatrix(), texture, light, normalMatrix);
+
+        Matrix.invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
+        Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
+
+        textureShaderProgram.setUniforms(modelViewProjectionMatrix, model.getModelMatrix(), texture, light, normalMatrix, new float[]{0,0,-27f}, normalViewMatrix);
         model.draw();
 
         drawSkybox();
+
+
 
 
 

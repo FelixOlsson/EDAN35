@@ -12,20 +12,6 @@ import static android.opengl.GLES30.*;
 public class ShaderBuilder {
 
 
-        /**
-         * Loads and compiles a vertex shader, returning the OpenGL object ID.
-         */
-        private static int compileVertexShader(String shaderCode) {
-            return compileShader(GL_VERTEX_SHADER, shaderCode);
-        }
-
-
-        /**
-         * Loads and compiles a fragment shader, returning the OpenGL object ID.
-         */
-        private static int compileFragmentShader(String shaderCode) {
-            return compileShader(GL_FRAGMENT_SHADER, shaderCode);
-        }
 
         private static int compileShader(int type, String shaderCode) {
 
@@ -82,8 +68,8 @@ public class ShaderBuilder {
                                        String fragmentShaderSource) {
             int program;
 
-            int vertexShader = compileVertexShader(vertexShaderSource);
-            int fragmentShader = compileFragmentShader(fragmentShaderSource);
+            int vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+            int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
             program = linkProgram(vertexShader, fragmentShader);
 

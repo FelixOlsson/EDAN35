@@ -9,9 +9,11 @@ attribute vec2 a_TextureCoordinates;
 varying vec2 v_TextureCoordinates;
 varying vec3 v_FragPos;
 varying vec3 v_Normal;
+varying vec3 v_NormTest;
 
 void main()
 {
+    v_NormTest = a_Normal;
     v_Normal = mat3(u_NormalMatrix) *  a_Normal;
     v_TextureCoordinates = a_TextureCoordinates;
     gl_Position = u_MVPMatrix * a_Position;

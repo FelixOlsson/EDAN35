@@ -23,6 +23,8 @@ public class TextureShaderProgram extends ShaderProgram {
     private final int uTextureUnitLocation;
     private final int uLightPosLocation;
     private final int uNormalMatrixLocation;
+    private final int uViewPositionLocation;
+    private final int uNormalViewLocation;
 
 
     // Attribute locations
@@ -41,6 +43,8 @@ public class TextureShaderProgram extends ShaderProgram {
         uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
         uLightPosLocation = glGetUniformLocation(program, U_LIGHT_POS);
         uNormalMatrixLocation = glGetUniformLocation(program, U_NORMAL_MATRIX);
+        uViewPositionLocation = glGetUniformLocation(program, U_VIEW_POS);
+        uNormalViewLocation = glGetUniformLocation(program, U_IT_MV_MATRIX);
 
 
         //Attributes
@@ -50,12 +54,14 @@ public class TextureShaderProgram extends ShaderProgram {
 
     }
 
-    public void setUniforms(float[] mvpMatrix, float[] mMatrix, int textureid, Light light, float[] normal) {
+    public void setUniforms(float[] mvpMatrix, float[] mMatrix, int textureid, Light light, float[] normal, float[] viewPos, float[] ViewNormMatrix) {
         //glUseProgram(program);
         glUniformMatrix4fv(uMVPMatrixLocation, 1, false, mvpMatrix, 0);
         glUniformMatrix4fv(uMMatrixLocation, 1, false, mMatrix, 0);
-        glUniform3f(uLightPosLocation, light.getX(), light.getY(), light.getZ());
+        glUniform3f(uLightPosLocation, 0, 0, 0);
         glUniformMatrix4fv(uNormalMatrixLocation, 1, false, normal, 0);
+        glUniform3f(uViewPositionLocation, viewPos[0], viewPos[1], viewPos[2]);
+        glUniformMatrix4fv(uNormalViewLocation, 1, false, ViewNormMatrix, 0);
 
         glActiveTexture(GL_TEXTURE0);
 

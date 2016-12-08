@@ -26,6 +26,7 @@ public class ShaderProgram {
     protected static final String U_POINT_LIGHT_POSITIONS =
             "u_PointLightPositions";
     protected static final String U_POINT_LIGHT_COLORS = "u_PointLightColors";
+    protected static final String U_VIEW_POS =  "U_viewPos";
 
 
     // Attribute constants
