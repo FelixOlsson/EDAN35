@@ -20,11 +20,13 @@ public class TextureShaderProgram extends ShaderProgram {
     // Unifrom locations
     private final int uMVPMatrixLocation;
     private final int uMMatrixLocation;
-    private final int uTextureUnitLocation;
+   // private final int uTextureUnitLocation;
     private final int uLightPosLocation;
     private final int uNormalMatrixLocation;
     private final int uViewPositionLocation;
     private final int uNormalViewLocation;
+    private final int uDiffuseTextureLocation;
+    private final int uSpecularTextureLocation;
 
 
     // Attribute locations
@@ -40,11 +42,13 @@ public class TextureShaderProgram extends ShaderProgram {
         //Uniforms
         uMVPMatrixLocation = glGetUniformLocation(program, U_MVP_MATRIX);
         uMMatrixLocation = glGetUniformLocation(program, U_M_MATRIX);
-        uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
+        //uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
         uLightPosLocation = glGetUniformLocation(program, U_LIGHT_POS);
         uNormalMatrixLocation = glGetUniformLocation(program, U_NORMAL_MATRIX);
         uViewPositionLocation = glGetUniformLocation(program, U_VIEW_POS);
         uNormalViewLocation = glGetUniformLocation(program, U_IT_MV_MATRIX);
+        uDiffuseTextureLocation = glGetUniformLocation(program, "material.diffuseTex");
+        uSpecularTextureLocation = glGetUniformLocation(program, "material.specularTex");
 
 
         //Attributes
@@ -54,7 +58,7 @@ public class TextureShaderProgram extends ShaderProgram {
 
     }
 
-    public void setUniforms(float[] mvpMatrix, float[] mMatrix, int textureid, Light light, float[] normal, float[] viewPos, float[] ViewNormMatrix) {
+    public void setUniforms(float[] mvpMatrix, float[] mMatrix, int textureid, Light light, float[] normal, float[] viewPos, float[] ViewNormMatrix, int textureid2) {
         //glUseProgram(program);
         glUniformMatrix4fv(uMVPMatrixLocation, 1, false, mvpMatrix, 0);
         glUniformMatrix4fv(uMMatrixLocation, 1, false, mMatrix, 0);
@@ -67,8 +71,13 @@ public class TextureShaderProgram extends ShaderProgram {
 
         glBindTexture(GL_TEXTURE_2D, textureid);
 
-        glUniform1i(uTextureUnitLocation, 0);
+        glUniform1i(uDiffuseTextureLocation, 0);
 
+        glActiveTexture(GL_TEXTURE1);
+
+        glBindTexture(GL_TEXTURE_2D, textureid2);
+
+        glUniform1i(uSpecularTextureLocation, 0);
 
     }
 

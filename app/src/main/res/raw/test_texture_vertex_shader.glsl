@@ -13,8 +13,9 @@ varying vec3 v_NormTest;
 
 void main()
 {
-    v_NormTest = a_Normal;
-    v_Normal = mat3(u_NormalMatrix) *  a_Normal;
+
+    //v_Normal = mat3(u_NormalMatrix) *  a_Normal;
+    v_Normal = mat3(transpose(inverse(u_MMatrix))) * a_Normal;
     v_TextureCoordinates = a_TextureCoordinates;
     gl_Position = u_MVPMatrix * a_Position;
     v_FragPos = vec3(u_MMatrix * a_Position);
