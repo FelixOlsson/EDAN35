@@ -63,6 +63,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] inversedMatrix = new float[16];
     private final float[] inversedViewMatrix = new float[16];
     private final float[] viewProjectionMatrix = new float[16];
+    private int height;
+    private int width;
 
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrameTime = 0.0f;
@@ -107,6 +109,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceChanged(GL10 unued, int width, int height) {
         glViewport(0, 0, width, height);
+        this.height = height;
+        this.width = width;
 
         float ratio = (float) width / height;
 
@@ -117,8 +121,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
         // Set the camera position (View matrix)
         Matrix.setLookAtM(viewMatrix, 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         //translateM(viewMatrix, 0, 0, 0 ,-15f);
@@ -183,6 +185,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         skybox.bindData(skyboxProgram);
         skybox.draw();
     }
+
 
 
 }
