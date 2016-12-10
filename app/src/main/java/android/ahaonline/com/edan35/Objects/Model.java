@@ -21,6 +21,7 @@ public class Model extends transformController {
     private VertexBuffer vertexBufferColor;
     private VertexBuffer vertexBufferCoords;
     private VertexBuffer vertexBufferNormals;
+    private TextureShaderProgram shader;
 
     private Context context;
 
@@ -114,6 +115,7 @@ public class Model extends transformController {
     }
 
     public void bindShader(TextureShaderProgram shaderTestProgram) {
+        this.shader = shaderTestProgram;
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
                 3, 0);
@@ -131,6 +133,9 @@ public class Model extends transformController {
 
     public void draw() {
         glDrawArrays(GL_TRIANGLES, 0, vertexCoords.length);
+        glDisableVertexAttribArray(shader.getPositionAttributeLocation());
+        glDisableVertexAttribArray(shader.getTextureCoordinatesAttributeLocation());
+        glDisableVertexAttribArray(shader.getNormalAttributeLocation());
     }
 
     /**

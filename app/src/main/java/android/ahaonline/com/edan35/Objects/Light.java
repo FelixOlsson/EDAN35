@@ -15,6 +15,7 @@ import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
 public class Light extends transformController {
 
     private VertexBuffer vertexBuffer;
+    private ShaderLightProgram shader;
 
     public Light() {
         super();
@@ -61,6 +62,7 @@ public class Light extends transformController {
     };
 
     public void bindShader(ShaderLightProgram shaderLightProgram) {
+        this.shader = shaderLightProgram;
         vertexBuffer.setVertexAttribPointer(0,
                 shaderLightProgram.getPositionAttributeLocation(),
                 COORDS_PER_VERTEX, 0);
@@ -69,5 +71,6 @@ public class Light extends transformController {
     public void draw() {
 
         glDrawArrays(GL_TRIANGLES, 0, lightCoords.length);
+        glDisableVertexAttribArray(shader.getPositionAttributeLocation());
     }
 }

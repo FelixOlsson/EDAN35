@@ -64,5 +64,7 @@ public class VertexBuffer {
 
         //Unbinding the buffer
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
     }
 }

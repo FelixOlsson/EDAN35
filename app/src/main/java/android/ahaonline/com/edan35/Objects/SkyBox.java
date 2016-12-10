@@ -15,6 +15,7 @@ public class SkyBox {
     private static final int POSITION_COMPONENT_COUNT = 3;
     private final VertexArray vertexArray;
     private final ByteBuffer indexArray;
+    private SkyBoxShaderProgram shader;
 
     public SkyBox() {
         // Create a unit cube.
@@ -59,6 +60,7 @@ public class SkyBox {
         indexArray.position(0);
     }
     public void bindData(SkyBoxShaderProgram skyboxProgram) {
+        this.shader = skyboxProgram;
         vertexArray.setVertexAttribPointer(0,
                 skyboxProgram.getPositionAttributeLocation(),
                 POSITION_COMPONENT_COUNT, 0);
@@ -66,5 +68,6 @@ public class SkyBox {
 
     public void draw() {
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, indexArray);
+        glDisableVertexAttribArray(shader.getPositionAttributeLocation());
     }
 }
