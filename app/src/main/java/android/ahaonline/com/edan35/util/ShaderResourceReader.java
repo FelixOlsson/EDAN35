@@ -1,4 +1,4 @@
-package android.ahaonline.com.edan35;
+package android.ahaonline.com.edan35.util;
 
 import android.content.Context;
 import java.io.BufferedReader;

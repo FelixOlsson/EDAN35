@@ -1,4 +1,4 @@
-package android.ahaonline.com.edan35;
+package android.ahaonline.com.edan35.util;
 
 /**
  * Created by felix on 17/11/2016.

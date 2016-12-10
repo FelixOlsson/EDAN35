@@ -1,6 +1,6 @@
 package android.ahaonline.com.edan35.data;
 
-import android.ahaonline.com.edan35.Constants;
+import android.ahaonline.com.edan35.util.Constants;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

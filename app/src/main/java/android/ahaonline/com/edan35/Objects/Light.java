@@ -2,10 +2,10 @@ package android.ahaonline.com.edan35.Objects;
 
 import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.ShaderLightProgram;
-import android.ahaonline.com.edan35.programs.ShaderTestProgram;
+
 import static android.opengl.GLES30.*;
 
-import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
+import static android.ahaonline.com.edan35.util.Constants.COORDS_PER_VERTEX;
 
 
 /**

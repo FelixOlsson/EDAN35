@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         loading_dialog.show();
 
 
-        final MyGLRenderer mRenderer = new MyGLRenderer(this, loading_dialog);
+        final Renderer mRenderer = new Renderer(this, loading_dialog);
         setContentView(R.layout.activity_main);
         RelativeLayout r = (RelativeLayout) findViewById(R.id.activity_main);
         mGLView = new GLSurfaceView(this);

@@ -8,23 +8,16 @@ import android.ahaonline.com.edan35.programs.FrameShaderProgram;
 import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.SkyBoxShaderProgram;
-import android.ahaonline.com.edan35.programs.TextureHelper;
+import android.ahaonline.com.edan35.util.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.app.Dialog;
 import android.content.Context;
 
-import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
 import static android.opengl.GLES30.*;
 
 
-import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.view.Display;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -43,7 +36,7 @@ import static android.opengl.Matrix.translateM;
 
 
 
-public class MyGLRenderer implements GLSurfaceView.Renderer {
+public class Renderer implements GLSurfaceView.Renderer {
 
     private Context context;
     private ShaderTestProgram shaderTestProgram;
@@ -88,7 +81,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrameTime = 0.0f;
 
-    public MyGLRenderer(Context context, Dialog loadScreen) {
+    public Renderer(Context context, Dialog loadScreen) {
         this.context = context;
         this.loadScreen = loadScreen;
     }
@@ -135,32 +128,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 unued, int width, int height) {
         glViewport(0, 0, width, height);
 
-
         float ratio = (float) width / height;
 
         Matrix.perspectiveM(projectionMatrix, 0, 45f, ratio, 0.1f, 100f);
 
-        glGenFramebuffers(frameBuffer.length, frameBuffer, 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer[0]);
-
-        glGenTextures(1, texColorBuffer, 0);
-        glBindTexture(GL_TEXTURE_2D, texColorBuffer[0]);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        postProcessingEffect(width,height);
 
 
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer[0], 0);
-
-        glGenRenderbuffers(1, rbo, 0);
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo[0]);
-
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo[0]);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     }
 
@@ -245,6 +219,30 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         skyboxProgram.setUniforms(viewProjectionMatrix, skyboxTexture);
         skybox.bindData(skyboxProgram);
         skybox.draw();
+    }
+
+    private void postProcessingEffect(int width, int height) {
+        glGenFramebuffers(frameBuffer.length, frameBuffer, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer[0]);
+
+        glGenTextures(1, texColorBuffer, 0);
+        glBindTexture(GL_TEXTURE_2D, texColorBuffer[0]);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer[0], 0);
+
+        glGenRenderbuffers(1, rbo, 0);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo[0]);
+
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo[0]);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
 

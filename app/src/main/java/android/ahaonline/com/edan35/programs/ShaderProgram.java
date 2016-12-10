@@ -1,6 +1,6 @@
 package android.ahaonline.com.edan35.programs;
 
-import android.ahaonline.com.edan35.ShaderResourceReader;
+import android.ahaonline.com.edan35.util.ShaderResourceReader;
 import android.content.Context;
 
 import static android.opengl.GLES30.*;

@@ -1,12 +1,10 @@
 package android.ahaonline.com.edan35.data;
 
-import android.opengl.GLUtils;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
+import static android.ahaonline.com.edan35.util.Constants.BYTES_PER_FLOAT;
 import static android.opengl.GLES30.*;
 /**
  * Created by felix on 17/11/2016.

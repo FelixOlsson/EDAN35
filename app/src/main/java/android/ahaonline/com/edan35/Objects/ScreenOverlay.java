@@ -6,10 +6,7 @@ package android.ahaonline.com.edan35.Objects;
 
 import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.FrameShaderProgram;
-import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 
-import static android.ahaonline.com.edan35.Constants.COORDS_PER_VERTEX;
-import static android.ahaonline.com.edan35.Objects.Light.lightCoords;
 import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.glDrawArrays;
 

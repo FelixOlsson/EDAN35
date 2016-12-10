@@ -16,7 +16,7 @@ package android.ahaonline.com.edan35.data;
 import java.nio.FloatBuffer;
 
 
-import static android.ahaonline.com.edan35.Constants.BYTES_PER_FLOAT;
+import static android.ahaonline.com.edan35.util.Constants.BYTES_PER_FLOAT;
 import static android.opengl.GLES30.*;
 
 import java.nio.ByteBuffer;
