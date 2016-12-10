@@ -8,6 +8,7 @@ import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.FrameShaderProgram;
 
 import static android.opengl.GLES20.GL_TRIANGLES;
+import static android.opengl.GLES20.glDisableVertexAttribArray;
 import static android.opengl.GLES20.glDrawArrays;
 
 
@@ -20,6 +21,7 @@ public class ScreenOverlay  {
 
     private VertexBuffer vertexBuffer;
     private VertexBuffer texCoordBuffer;
+    private FrameShaderProgram shader;
 
     public ScreenOverlay() {
 
@@ -47,6 +49,7 @@ public class ScreenOverlay  {
     };
 
     public void bindShader(FrameShaderProgram shaderLightProgram) {
+        this.shader = shaderLightProgram;
         vertexBuffer.setVertexAttribPointer(0,
                 shaderLightProgram.getPositionAttributeLocation(),
                 2, 0);
@@ -58,5 +61,7 @@ public class ScreenOverlay  {
     public void draw() {
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDisableVertexAttribArray(shader.getPositionAttributeLocation());
+        glDisableVertexAttribArray(shader.getTextureAttributeLocation());
     }
 }

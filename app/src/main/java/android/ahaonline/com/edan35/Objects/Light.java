@@ -69,7 +69,7 @@ public class Light extends transformController {
     }
 
     public void draw() {
-
+        System.out.println("lightCoords: " + lightCoords.length);
         glDrawArrays(GL_TRIANGLES, 0, lightCoords.length);
         glDisableVertexAttribArray(shader.getPositionAttributeLocation());
     }

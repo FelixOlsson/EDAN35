@@ -13,11 +13,16 @@ import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.app.Dialog;
 import android.content.Context;
 
+import static android.R.attr.max;
 import static android.opengl.GLES30.*;
 
 
+import android.graphics.PorterDuff;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -43,7 +48,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private ShaderLightProgram shaderLightProgram;
     private TextureShaderProgram textureShaderProgram;
     private FrameShaderProgram frameShaderProgram;
-    private Model model;
+    private ArrayList<Model> asteroids = new ArrayList<>();
     private ScreenOverlay screenOverlay;
     private Light light;
     private Dialog loadScreen;
@@ -75,9 +80,6 @@ public class Renderer implements GLSurfaceView.Renderer {
     private int width;
 
 
-
-
-
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrameTime = 0.0f;
 
@@ -95,31 +97,34 @@ public class Renderer implements GLSurfaceView.Renderer {
         frameShaderProgram = new FrameShaderProgram(context);
         texture = TextureHelper.loadTexture(context, R.drawable.container2);
         texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
-        model = new Model();
-        model.loadModel(context, R.raw.cube);
+        for(int i = 0; i < 10; i++) {
+
+
+            Model asteroid = new Model();
+            asteroid.loadModel(context, R.raw.cube);
+            asteroid.scale(randomNumber(1.0f,5.0f));
+            float x = randomNumber(-25.0f,25.0f);
+            float y = randomNumber(-25.0f,25.0f);
+            float z = randomNumber(-25.0f,25.0f);
+            asteroid.translate(x,y,z);
+            asteroids.add(asteroid);
+        }
+
+
         shaderTestProgram = new ShaderTestProgram(context);
         shaderLightProgram = new ShaderLightProgram(context);
         light = new Light();
-        model.scale(3f);
-        model.translate(0f,1f, -2f);
         screenOverlay = new ScreenOverlay();
 
         skyboxProgram = new SkyBoxShaderProgram(context);
         skybox = new SkyBox();
         skyboxTexture = TextureHelper.loadCubeMap(context,
-                new int[] { R.drawable.spacelf, R.drawable.spacert,
-                        R.drawable.spaceup, R.drawable.spacedn,
-                         R.drawable.spaceft, R.drawable.spacebk});
+                new int[] {  R.drawable.spacert, R.drawable.spacelf,
+                          R.drawable.spaceup, R.drawable.spacedn,
+                          R.drawable.spacebk, R.drawable.spaceft});
 
+        setIdentityM(projectionMatrix, 0);
         loadScreen.dismiss();
-
-
-
-
-
-
-
-
 
 
     }
@@ -143,9 +148,9 @@ public class Renderer implements GLSurfaceView.Renderer {
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer[0]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+
 
 
 
@@ -165,25 +170,9 @@ public class Renderer implements GLSurfaceView.Renderer {
         light.draw();
 
 
-        model.rotateX(0.5f);
-
-        model.transformMatrix();
-        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, model.getModelMatrix(), 0);
-        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-
-
-        textureShaderProgram.useProgram();
-        model.bindShader(textureShaderProgram);
-        Matrix.invertM(inversedMatrix, 0, model.getModelMatrix(), 0);
-        Matrix.transposeM(normalMatrix, 0, inversedMatrix, 0);
-
-        Matrix.invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
-        Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
-
-        textureShaderProgram.setUniforms(modelViewProjectionMatrix, model.getModelMatrix(), texture, light, normalMatrix, new float[]{0,0,0f}, normalViewMatrix, texture2);
-        model.draw();
-
+        drawAsteroids();
         drawSkybox();
+
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -211,14 +200,16 @@ public class Renderer implements GLSurfaceView.Renderer {
     }
 
     private void drawSkybox() {
-        setIdentityM(viewMatrix, 0);
+        glDepthFunc(GL_LEQUAL);
+        //setIdentityM(viewMatrix, 0);
         rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
         rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
         skyboxProgram.useProgram();
-        skyboxProgram.setUniforms(viewProjectionMatrix, skyboxTexture);
+        skyboxProgram.setUniforms(projectionMatrix, viewMatrix, skyboxTexture);
         skybox.bindData(skyboxProgram);
         skybox.draw();
+        glDepthFunc(GL_LESS);
     }
 
     private void postProcessingEffect(int width, int height) {
@@ -245,6 +236,32 @@ public class Renderer implements GLSurfaceView.Renderer {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    private void drawAsteroids() {
 
+        for(Model asteroid: asteroids) {
+            asteroid.rotateX(0.5f);
+
+            asteroid.transformMatrix();
+            multiplyMM(modelViewMatrix, 0, viewMatrix, 0, asteroid.getModelMatrix(), 0);
+            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+            textureShaderProgram.useProgram();
+            asteroid.bindShader(textureShaderProgram);
+            Matrix.invertM(inversedMatrix, 0, asteroid.getModelMatrix(), 0);
+            Matrix.transposeM(normalMatrix, 0, inversedMatrix, 0);
+
+            Matrix.invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
+            Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
+
+            textureShaderProgram.setUniforms(modelViewProjectionMatrix, asteroid.getModelMatrix(), texture, light, normalMatrix, new float[]{0, 0, 0f}, normalViewMatrix, texture2);
+            asteroid.draw();
+        }
+
+    }
+
+    private float randomNumber(float min, float max) {
+        Random rand = new Random();
+        return rand.nextFloat() * (max - min) + min;
+    }
 
 }

@@ -83,16 +83,18 @@ public class TextureHelper {
      * @return
      */
     public static int loadCubeMap(Context context, int[] cubeResources) {
+
         final int[] textureObjectIds = new int[1];
         glGenTextures(1, textureObjectIds, 0);
 
         if (textureObjectIds[0] == 0) {
-
             return 0;
         }
+
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
         final Bitmap[] cubeBitmaps = new Bitmap[6];
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureObjectIds[0]);
         for (int i = 0; i < 6; i++) {
             cubeBitmaps[i] =
                     BitmapFactory.decodeResource(context.getResources(),
@@ -103,20 +105,18 @@ public class TextureHelper {
                 glDeleteTextures(1, textureObjectIds, 0);
                 return 0;
             }
+
+            texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, cubeBitmaps[i], 0);
         }
-        // Linear filtering for minification and magnification
-        glBindTexture(GL_TEXTURE_CUBE_MAP, textureObjectIds[0]);
 
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        texImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, cubeBitmaps[0], 0);
-        texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, cubeBitmaps[1], 0);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-        texImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, cubeBitmaps[2], 0);
-        texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, cubeBitmaps[3], 0);
 
-        texImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, cubeBitmaps[4], 0);
-        texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, cubeBitmaps[5], 0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         for (Bitmap bitmap : cubeBitmaps) {

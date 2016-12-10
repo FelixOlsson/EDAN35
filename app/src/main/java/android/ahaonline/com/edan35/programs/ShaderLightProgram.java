@@ -20,8 +20,8 @@ public class ShaderLightProgram extends ShaderProgram {
 
     public ShaderLightProgram(Context context) {
 
-        super(context, R.raw.test_light_vertex_shader,
-                R.raw.test_light_fragment_shader);
+        super(context, R.raw.light_vertex_shader,
+                R.raw.light_fragment_shader);
 
         //Uniforms
         uMVPMatrixLocation = glGetUniformLocation(program, U_MVP_MATRIX);
