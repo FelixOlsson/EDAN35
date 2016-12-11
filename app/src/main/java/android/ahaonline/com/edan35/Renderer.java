@@ -14,11 +14,9 @@ import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.app.Dialog;
 import android.content.Context;
 
-import static android.R.attr.max;
 import static android.opengl.GLES30.*;
 
 
-import android.graphics.PorterDuff;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
@@ -29,12 +27,14 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 
+import static android.opengl.Matrix.invertM;
 import static android.opengl.Matrix.multiplyMM;
+import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.rotateM;
 import static android.opengl.Matrix.scaleM;
 import static android.opengl.Matrix.setIdentityM;
 import static android.opengl.Matrix.translateM;
-
+import static android.ahaonline.com.edan35.util.Geometry.*;
 /**
  * Created by felix on 15/11/2016.
  */
@@ -47,9 +47,10 @@ public class Renderer implements GLSurfaceView.Renderer {
     private Context context;
     private ShaderTestProgram shaderTestProgram;
     private ShaderLightProgram shaderLightProgram;
-    private TextureShaderProgram textureShaderProgram;
+    private TextureShaderProgram textureShaderProgram, textureShaderProgram2;
     private FrameShaderProgram frameShaderProgram;
     private ArrayList<Model> asteroids = new ArrayList<>();
+    private Model spaceship;
     private ScreenOverlay screenOverlay;
     private Light light;
     private Dialog loadScreen;
@@ -72,6 +73,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final float[] inversedMatrix = new float[16];
     private final float[] inversedViewMatrix = new float[16];
     private final float[] viewProjectionMatrix = new float[16];
+    private final float[] invertedViewProjectionMatrix = new float[16];
     private final int[] frameBuffer = new int[1];
     private final int[] texColorBuffer = new int[1];
     private final int[] rbo = new int[1];
@@ -95,7 +97,9 @@ public class Renderer implements GLSurfaceView.Renderer {
 
 
         textureShaderProgram = new TextureShaderProgram(context);
+        textureShaderProgram2 = new TextureShaderProgram(context);
         frameShaderProgram = new FrameShaderProgram(context);
+        texture3 = TextureHelper.loadTexture(context, R.drawable.spaceship);
         texture = TextureHelper.loadTexture(context, R.drawable.container2);
         texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
         for(int i = 0; i < 10; i++) {
@@ -109,6 +113,13 @@ public class Renderer implements GLSurfaceView.Renderer {
             asteroid.transformMatrix();
             asteroids.add(asteroid);
         }
+
+        spaceship = new Model();
+        spaceship.loadModel(context, R.raw.spaceship);
+        spaceship.translate(0,0,0);
+        spaceship.rotateX(45f);
+        spaceship.scale(10f);
+        spaceship.transformMatrix();
 
 
         shaderTestProgram = new ShaderTestProgram(context);
@@ -163,6 +174,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         travleVector(light);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, light.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
 
         shaderLightProgram.useProgram();
         light.bindShader(shaderLightProgram);
@@ -190,21 +203,13 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     }
 
-    public void handleTouchDrag(float deltaX, float deltaY) {
-        xRotation += deltaX / 16f;
-        yRotation += deltaY / 16f;
-        if (yRotation < -90) {
-            yRotation = -90;
-        } else if (yRotation > 90) {
-            yRotation = 90;
-        }
-    }
+
 
     private void drawSkybox() {
         glDepthFunc(GL_LEQUAL);
         setIdentityM(viewMatrix, 0);
-        rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
-        rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
+        //rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
+        //rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
         skyboxProgram.useProgram();
         skyboxProgram.setUniforms(projectionMatrix, viewMatrix, skyboxTexture);
@@ -249,15 +254,30 @@ public class Renderer implements GLSurfaceView.Renderer {
 
             textureShaderProgram.useProgram();
             asteroid.bindShader(textureShaderProgram);
-            Matrix.invertM(inversedMatrix, 0, asteroid.getModelMatrix(), 0);
+            invertM(inversedMatrix, 0, asteroid.getModelMatrix(), 0);
             Matrix.transposeM(normalMatrix, 0, inversedMatrix, 0);
 
-            Matrix.invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
+            invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
             Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
 
             textureShaderProgram.setUniforms(modelViewProjectionMatrix, asteroid.getModelMatrix(), texture, light, normalMatrix, new float[]{0, 0, 0f}, normalViewMatrix, texture2);
             asteroid.draw();
         }
+        spaceship.rotateX(0.5f);
+        spaceship.transformMatrix();
+        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, spaceship.getModelMatrix(), 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+        textureShaderProgram2.useProgram();
+        spaceship.bindShader(textureShaderProgram2);
+        invertM(inversedMatrix, 0, spaceship.getModelMatrix(), 0);
+        Matrix.transposeM(normalMatrix, 0, inversedMatrix, 0);
+
+        invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
+        Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
+
+        textureShaderProgram2.setUniforms(modelViewProjectionMatrix, spaceship.getModelMatrix(), texture3, light, normalMatrix, new float[]{0, 0, 0f}, normalViewMatrix, texture3);
+        spaceship.draw();
 
     }
 
@@ -268,6 +288,64 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private void travleVector(Light light) {
 
+    }
+
+    public void handleTouchDrag(float deltaX, float deltaY) {
+        System.out.println("coords: " + deltaX + " " + deltaY);
+        Ray ray = convertNormalized2DPointToRay(deltaX, deltaY);
+        light.translate(ray.point.x,ray.point.y, 0);
+        System.out.println("coords: " + ray.point.x + " " + ray.point.y);
+        light.transformMatrix();
+    }
+
+    public void handleTouchPress(float deltaX, float deltaY) {
+        System.out.println("coords: " + deltaX + " " + deltaY);
+        Ray ray = convertNormalized2DPointToRay(deltaX, deltaY);
+        light.translate(ray.point.x,ray.point.y, 0);
+        light.transformMatrix();
+
+    }
+
+    private Ray convertNormalized2DPointToRay(
+            float normalizedX, float normalizedY) {
+        // We'll convert these normalized device coordinates into world-space
+        // coordinates. We'll pick a point on the near and far planes, and draw a
+        // line between them. To do this transform, we need to first multiply by
+        // the inverse matrix, and then we need to undo the perspective divide.
+        final float[] nearPointNdc = {normalizedX, normalizedY, -1, 1};
+        final float[] farPointNdc =  {normalizedX, normalizedY,  1, 1};
+
+        final float[] nearPointWorld = new float[4];
+        final float[] farPointWorld = new float[4];
+
+        multiplyMV(
+                nearPointWorld, 0, invertedViewProjectionMatrix, 0, nearPointNdc, 0);
+        multiplyMV(
+                farPointWorld, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
+
+        // Why are we dividing by W? We multiplied our vector by an inverse
+        // matrix, so the W value that we end up is actually the *inverse* of
+        // what the projection matrix would create. By dividing all 3 components
+        // by W, we effectively undo the hardware perspective divide.
+        divideByW(nearPointWorld);
+        divideByW(farPointWorld);
+
+        // We don't care about the W value anymore, because our points are now
+        // in world coordinates.
+        Point nearPointRay =
+                new Point(nearPointWorld[0], nearPointWorld[1], nearPointWorld[2]);
+
+        Point farPointRay =
+                new Point(farPointWorld[0], farPointWorld[1], farPointWorld[2]);
+
+        return new Ray(nearPointRay,
+                Geometry.vectorBetween(nearPointRay, farPointRay));
+    }
+
+    private void divideByW(float[] vector) {
+        vector[0] /= vector[3];
+        vector[1] /= vector[3];
+        vector[2] /= vector[3];
     }
 
 }

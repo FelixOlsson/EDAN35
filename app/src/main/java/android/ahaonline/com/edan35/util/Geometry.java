@@ -75,4 +75,14 @@ public class Geometry {
                 to.y - from.y,
                 to.z - from.z);
     }
+
+    public static class Ray {
+        public final Point point;
+        public final Vector vector;
+
+        public Ray(Point point, Vector vector) {
+            this.point = point;
+            this.vector = vector;
+        }
+    }
 }

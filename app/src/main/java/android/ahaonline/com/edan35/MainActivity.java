@@ -35,27 +35,31 @@ public class MainActivity extends AppCompatActivity {
         r.addView(mGLView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         mGLView.setOnTouchListener(new View.OnTouchListener() {
-            float previousX, previousY;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event != null) {
+
+                    final float normalizedX =
+                            (event.getX() / (float) v.getWidth() * 2 - 1);
+
+                    final float normalizedY =
+                            -(event.getY() / (float) v.getHeight() * 2 - 1);
+
                     if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                        previousX = event.getX();
-                        previousY = event.getY();
+                        mGLView.queueEvent(new Runnable() {
+                            @Override
+                            public void run() {
+                                mRenderer.handleTouchPress(
+                                        normalizedX, normalizedY);
+                            }
+                        });
                     } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                        final float deltaX = event.getX() - previousX;
-                        final float deltaY = event.getY() - previousY;
-
-                        previousX = event.getX();
-                        previousY = event.getY();
-
                         mGLView.queueEvent(new Runnable() {
                             @Override
                             public void run() {
                                 mRenderer.handleTouchDrag(
-                                        deltaX, deltaY);
-
+                                        normalizedX, normalizedY);
                             }
                         });
                     }
