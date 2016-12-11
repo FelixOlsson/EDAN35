@@ -132,7 +132,7 @@ public class Model extends transformController {
     }
 
     public void draw() {
-        glDrawArrays(GL_TRIANGLES, 0, vertexCoords.length);
+        glDrawArrays(GL_TRIANGLES, 0, vertexCoords.length/3);
         glDisableVertexAttribArray(shader.getPositionAttributeLocation());
         glDisableVertexAttribArray(shader.getTextureCoordinatesAttributeLocation());
         glDisableVertexAttribArray(shader.getNormalAttributeLocation());
