@@ -8,6 +8,7 @@ import android.ahaonline.com.edan35.programs.FrameShaderProgram;
 import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.SkyBoxShaderProgram;
+import android.ahaonline.com.edan35.util.Geometry;
 import android.ahaonline.com.edan35.util.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.app.Dialog;
@@ -98,8 +99,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         texture = TextureHelper.loadTexture(context, R.drawable.container2);
         texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
         for(int i = 0; i < 10; i++) {
-
-
             Model asteroid = new Model();
             asteroid.loadModel(context, R.raw.cube);
             asteroid.scale(randomNumber(1.0f,5.0f));
@@ -107,6 +106,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             float y = randomNumber(-25.0f,25.0f);
             float z = randomNumber(-25.0f,25.0f);
             asteroid.translate(x,y,z);
+            asteroid.transformMatrix();
             asteroids.add(asteroid);
         }
 
@@ -135,7 +135,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         float ratio = (float) width / height;
 
-        Matrix.perspectiveM(projectionMatrix, 0, 45f, ratio, 0.1f, 100f);
+        Matrix.perspectiveM(projectionMatrix, 0, 90f, ratio, 0.1f, 150f);
 
         postProcessingEffect(width,height);
 
@@ -160,7 +160,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
         //translateM(viewMatrix, 0, 0,0,cameraMovement++);
 
-
+        travleVector(light);
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, light.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
@@ -172,6 +172,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         drawAsteroids();
         drawSkybox();
+
 
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -201,7 +202,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private void drawSkybox() {
         glDepthFunc(GL_LEQUAL);
-        //setIdentityM(viewMatrix, 0);
+        setIdentityM(viewMatrix, 0);
         rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
         rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
@@ -240,6 +241,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         for(Model asteroid: asteroids) {
             asteroid.rotateX(0.5f);
+            asteroid.translate(0 , 0, - 0.01f);
 
             asteroid.transformMatrix();
             multiplyMM(modelViewMatrix, 0, viewMatrix, 0, asteroid.getModelMatrix(), 0);
@@ -262,6 +264,10 @@ public class Renderer implements GLSurfaceView.Renderer {
     private float randomNumber(float min, float max) {
         Random rand = new Random();
         return rand.nextFloat() * (max - min) + min;
+    }
+
+    private void travleVector(Light light) {
+
     }
 
 }

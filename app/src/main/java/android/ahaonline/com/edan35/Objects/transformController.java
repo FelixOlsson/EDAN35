@@ -14,6 +14,7 @@ public class transformController {
     private float x, y, z;
     private float rotationX, rotationY, rotationZ;
     private final float[] modelMatrix = new float[16];
+    private float vel, rot;
 
     //temporary values
     private float tX = 0, tY = 0, tZ = 0;
@@ -26,12 +27,12 @@ public class transformController {
 
 
     public void translate(float x, float y, float z) {
-        this.x += x;
-        this.y += y;
-        this.z += z;
-        tX = x;
-        tY = y;
-        tZ = z;
+            this.x += x;
+            tX = x;
+            this.y += y;
+            tY = y;
+            this.z += z;
+            tZ = z;
     }
 
     public void rotateX(float degree) {
@@ -105,6 +106,22 @@ public class transformController {
         tX = 0;
         tY = 0;
         tZ = 0;
+    }
+
+    public void setVel(float vel) {
+        this.vel = vel;
+    }
+
+    public void setRot(float rot) {
+        this.rot = rot;
+    }
+
+    public float getVel() {
+        return vel;
+    }
+
+    public float getRot() {
+        return rot;
     }
 
 
