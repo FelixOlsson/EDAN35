@@ -50,6 +50,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private TextureShaderProgram textureShaderProgram, textureShaderProgram2;
     private FrameShaderProgram frameShaderProgram;
     private ArrayList<Model> asteroids = new ArrayList<>();
+    private ArrayList<Model> lights = new ArrayList<>();
     private Model spaceship;
     private ScreenOverlay screenOverlay;
     private Light light;
@@ -77,8 +78,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final int[] frameBuffer = new int[1];
     private final int[] texColorBuffer = new int[1];
     private final int[] rbo = new int[1];
-    private final int[] quadVAO = new int[1];
-    private final int[] quadVBO = new int[1];
+
     private int height;
     private int width;
 
@@ -93,8 +93,6 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        // Set the background frame color
-
 
         textureShaderProgram = new TextureShaderProgram(context);
         textureShaderProgram2 = new TextureShaderProgram(context);
@@ -112,6 +110,18 @@ public class Renderer implements GLSurfaceView.Renderer {
             asteroid.translate(x,y,z);
             asteroid.transformMatrix();
             asteroids.add(asteroid);
+        }
+
+        for(int i = 0; i < 3; i++) {
+            Model light = new Model();
+            light.loadModel(context, R.raw.light);
+            light.scale(randomNumber(1.0f,5.0f));
+            float x = randomNumber(-10.0f,10.0f);
+            float y = randomNumber(-10.0f,10.0f);
+            float z = randomNumber(-10.0f,10.0f);
+            light.translate(x,y,z);
+            light.transformMatrix();
+            lights.add(light);
         }
 
         spaceship = new Model();
@@ -184,6 +194,8 @@ public class Renderer implements GLSurfaceView.Renderer {
 
 
         drawAsteroids();
+        //drawSpaceship();
+        drawLights();
         drawSkybox();
 
 
@@ -263,6 +275,30 @@ public class Renderer implements GLSurfaceView.Renderer {
             textureShaderProgram.setUniforms(modelViewProjectionMatrix, asteroid.getModelMatrix(), texture, light, normalMatrix, new float[]{0, 0, 0f}, normalViewMatrix, texture2);
             asteroid.draw();
         }
+
+
+    }
+
+    private void drawLights() {
+
+        for(Model light : lights) {
+            light.rotateY(0.5f);
+            light.translate(0 , 0, - 0.01f);
+
+            light.transformMatrix();
+            multiplyMM(modelViewMatrix, 0, viewMatrix, 0, light.getModelMatrix(), 0);
+            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+            shaderLightProgram.useProgram();
+            light.bindShader(shaderLightProgram);
+            shaderLightProgram.setUniforms(modelViewProjectionMatrix);
+            light.draw();
+        }
+
+
+    }
+
+    public void drawSpaceship() {
         spaceship.rotateX(0.5f);
         spaceship.transformMatrix();
         multiplyMM(modelViewMatrix, 0, viewMatrix, 0, spaceship.getModelMatrix(), 0);
@@ -278,7 +314,6 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         textureShaderProgram2.setUniforms(modelViewProjectionMatrix, spaceship.getModelMatrix(), texture3, light, normalMatrix, new float[]{0, 0, 0f}, normalViewMatrix, texture3);
         spaceship.draw();
-
     }
 
     private float randomNumber(float min, float max) {
@@ -308,10 +343,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private Ray convertNormalized2DPointToRay(
             float normalizedX, float normalizedY) {
-        // We'll convert these normalized device coordinates into world-space
-        // coordinates. We'll pick a point on the near and far planes, and draw a
-        // line between them. To do this transform, we need to first multiply by
-        // the inverse matrix, and then we need to undo the perspective divide.
+
         final float[] nearPointNdc = {normalizedX, normalizedY, -1, 1};
         final float[] farPointNdc =  {normalizedX, normalizedY,  1, 1};
 
@@ -323,15 +355,9 @@ public class Renderer implements GLSurfaceView.Renderer {
         multiplyMV(
                 farPointWorld, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
 
-        // Why are we dividing by W? We multiplied our vector by an inverse
-        // matrix, so the W value that we end up is actually the *inverse* of
-        // what the projection matrix would create. By dividing all 3 components
-        // by W, we effectively undo the hardware perspective divide.
         divideByW(nearPointWorld);
         divideByW(farPointWorld);
 
-        // We don't care about the W value anymore, because our points are now
-        // in world coordinates.
         Point nearPointRay =
                 new Point(nearPointWorld[0], nearPointWorld[1], nearPointWorld[2]);
 

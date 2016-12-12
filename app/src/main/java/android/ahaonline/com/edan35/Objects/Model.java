@@ -1,6 +1,7 @@
 package android.ahaonline.com.edan35.Objects;
 
 import android.ahaonline.com.edan35.data.VertexBuffer;
+import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 import static android.opengl.GLES30.*;
@@ -21,7 +22,8 @@ public class Model extends transformController {
     private VertexBuffer vertexBufferColor;
     private VertexBuffer vertexBufferCoords;
     private VertexBuffer vertexBufferNormals;
-    private TextureShaderProgram shader;
+    private TextureShaderProgram shaderTex;
+    private ShaderLightProgram shaderLight;
 
     private Context context;
 
@@ -115,7 +117,7 @@ public class Model extends transformController {
     }
 
     public void bindShader(TextureShaderProgram shaderTestProgram) {
-        this.shader = shaderTestProgram;
+        this.shaderTex = shaderTestProgram;
         vertexBuffer.setVertexAttribPointer(0,
                 shaderTestProgram.getPositionAttributeLocation(),
                 3, 0);
@@ -131,11 +133,24 @@ public class Model extends transformController {
 
     }
 
+    public void bindShader(ShaderLightProgram shaderLightProgram) {
+        this.shaderLight = shaderLightProgram;
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderLightProgram.getPositionAttributeLocation(),
+                3, 0);
+
+
+    }
+
     public void draw() {
         glDrawArrays(GL_TRIANGLES, 0, vertexCoords.length/3);
-        glDisableVertexAttribArray(shader.getPositionAttributeLocation());
-        glDisableVertexAttribArray(shader.getTextureCoordinatesAttributeLocation());
-        glDisableVertexAttribArray(shader.getNormalAttributeLocation());
+        if(shaderTex != null) {
+        glDisableVertexAttribArray(shaderTex.getPositionAttributeLocation());
+        glDisableVertexAttribArray(shaderTex.getTextureCoordinatesAttributeLocation());
+        glDisableVertexAttribArray(shaderTex.getNormalAttributeLocation());
+        } else if (shaderLight != null) {
+            glDisableVertexAttribArray(shaderLight.getPositionAttributeLocation());
+        }
     }
 
     /**
