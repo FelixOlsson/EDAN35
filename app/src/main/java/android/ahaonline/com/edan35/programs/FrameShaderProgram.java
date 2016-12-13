@@ -19,6 +19,7 @@ public class FrameShaderProgram extends ShaderProgram {
 
     // Unifrom locations
     private final int uTextureLocation;
+    private final int uBlurrTexLocation;
 
     // Attribute locations
     private final int aPositionLocation;
@@ -31,6 +32,7 @@ public class FrameShaderProgram extends ShaderProgram {
 
         //Uniforms
         uTextureLocation = glGetUniformLocation(program, "screenTexture");
+        uBlurrTexLocation = glGetUniformLocation(program, "blurrTexture");
 
         //Attributes
         aPositionLocation = glGetAttribLocation(program, "position");
@@ -38,12 +40,18 @@ public class FrameShaderProgram extends ShaderProgram {
 
     }
 
-    public void setUniforms(int textureid) {
+    public void setUniforms(int textureid ,int textureid2) {
         glActiveTexture(GL_TEXTURE0);
 
         glBindTexture(GL_TEXTURE_2D, textureid);
 
         glUniform1i(uTextureLocation, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+
+        glBindTexture(GL_TEXTURE_2D, textureid2);
+
+        glUniform1i(uBlurrTexLocation, 0);
     }
 
     public int getPositionAttributeLocation() {

@@ -12,12 +12,14 @@ public class ShaderTestProgram extends ShaderProgram {
 
     // Unifrom locations
     private final int uMVPMatrixLocation;
-    private final int uColorLocation;
+    private final int uDiffuseTextureLocation;
+
 
 
     // Attribute locations
     private final int aPositionLocation;
-    private final int aColorLocation;
+    private final int aTextureCoordinateLocation;
+
 
     public ShaderTestProgram(Context context) {
 
@@ -25,20 +27,26 @@ public class ShaderTestProgram extends ShaderProgram {
     R.raw.test_fragment_shader);
 
         //Uniforms
-        uMVPMatrixLocation = glGetUniformLocation(program, U_MVP_MATRIX);
-        uColorLocation = glGetUniformLocation(program, U_COLOR);
+        uMVPMatrixLocation = glGetUniformLocation(program, "u_MVPMatrix");
+        uDiffuseTextureLocation = glGetUniformLocation(program, "u_Texture");
+
 
         //Attributes
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
-        aColorLocation = glGetAttribLocation(program, A_COLOR);
+        aTextureCoordinateLocation = glGetAttribLocation(program, A_TEXTURE_COORDINATES);
+
 
 }
 
-    public void setUniforms(float[] mvpMatrix, float[] color) {
-        //glUseProgram(program);
-        glUniformMatrix4fv(uMVPMatrixLocation, 1, false, mvpMatrix, 0);
-        glUniform4fv(uColorLocation, 1, color, 0);
+    public void setUniforms(float[] mvpMatrix, int textureId) {
 
+        glUniformMatrix4fv(uMVPMatrixLocation, 1, false, mvpMatrix, 0);
+
+        glActiveTexture(GL_TEXTURE0);
+
+        glBindTexture(GL_TEXTURE_2D, textureId);
+
+        glUniform1i(uDiffuseTextureLocation, 0);
 
 
     }
@@ -46,8 +54,8 @@ public class ShaderTestProgram extends ShaderProgram {
     public int getPositionAttributeLocation() {
         return aPositionLocation;
     }
-
-    public int getColorAttributeLocation() {
-        return aColorLocation;
+    public int getTextureCoordinatesAttributeLocation() {
+        return  aTextureCoordinateLocation;
     }
+
 }

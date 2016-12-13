@@ -1,7 +1,9 @@
+#version 300 es
+
 uniform mat4 projection;
 uniform mat4 view;
-attribute vec3 a_Position;  
-varying vec3 v_Position;
+in vec3 a_Position;
+out vec3 v_Position;
 
 void main()                    
 {                                	  	          

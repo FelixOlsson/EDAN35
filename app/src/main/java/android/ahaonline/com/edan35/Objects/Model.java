@@ -2,6 +2,7 @@ package android.ahaonline.com.edan35.Objects;
 
 import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.ShaderLightProgram;
+import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 
@@ -27,6 +28,7 @@ public class Model extends transformController {
     private VertexBuffer vertexBufferNormals;
     private TextureShaderProgram shaderTex;
     private ShaderLightProgram shaderLight;
+    private ShaderTestProgram shaderTestProgram;
 
     private Context context;
 
@@ -185,6 +187,19 @@ public class Model extends transformController {
 
     }
 
+    public void bindShader(ShaderTestProgram shaderLightProgram) {
+        this.shaderTestProgram = shaderLightProgram;
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderTestProgram.getPositionAttributeLocation(),
+                3, 0);
+
+        vertexBufferCoords.setVertexAttribPointer(0,
+                shaderTestProgram.getTextureCoordinatesAttributeLocation(),
+                2, 0);
+
+
+    }
+
     public void draw() {
         glDrawArrays(GL_TRIANGLES, 0, vertexCoords.length/3);
         if(shaderTex != null) {
@@ -193,6 +208,9 @@ public class Model extends transformController {
         glDisableVertexAttribArray(shaderTex.getNormalAttributeLocation());
         } else if (shaderLight != null) {
             glDisableVertexAttribArray(shaderLight.getPositionAttributeLocation());
+        } else if (shaderTestProgram != null) {
+            glDisableVertexAttribArray(shaderTestProgram.getPositionAttributeLocation());
+            glDisableVertexAttribArray(shaderTestProgram.getTextureCoordinatesAttributeLocation());
         }
     }
 

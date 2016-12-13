@@ -1,6 +1,7 @@
 varying vec2 TexCoords;
 
 uniform sampler2D screenTexture;
+uniform sampler2D blurrTexture;
 
 
 void main()
@@ -19,10 +20,10 @@ void main()
             vec2(offset,  -offset)  // bottom-right
         );
 
-        /*float kernel[] = float[9](
-            -1.0f, -1.0f, -1.0f,
-            -1.0f,  9.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f
+       /* float kernel[] = float[9](
+            -1.0, -1.0, -1.0,
+            -1.0,  8.0, -1.0,
+            -1.0, -1.0, -1.0
         );*/
 
         float kernel[] = float[9](
@@ -34,11 +35,25 @@ void main()
         vec3 sampleTex[9];
         for(int i = 0; i < 9; i++)
         {
-            sampleTex[i] = vec3(texture2D(screenTexture, TexCoords.st + offsets[i]));
+            sampleTex[i] = vec3(texture2D(blurrTexture, TexCoords.st + offsets[i]));
         }
         vec3 col = vec3(0.0);
         for(int i = 0; i < 9; i++)
             col += sampleTex[i] * kernel[i];
 
-        gl_FragColor = vec4(col, 1.0);
+       const float gamma = 2.2;
+       const float exposure = 0.5;
+       vec3 hdrColor = texture2D(screenTexture, TexCoords).rgb;
+       vec3 bloomColor = col;
+       hdrColor += bloomColor;
+       vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
+       result = pow(result, vec3(1.0 / gamma));
+       gl_FragColor = vec4(result, 1.0f);
+
+
+        //gl_FragColor = vec4(hdrColor, 0.1f);
+
+
+
+
 }

@@ -5,7 +5,6 @@ import android.ahaonline.com.edan35.Objects.Model;
 import android.ahaonline.com.edan35.Objects.ScreenOverlay;
 import android.ahaonline.com.edan35.Objects.SkyBox;
 import android.ahaonline.com.edan35.programs.FrameShaderProgram;
-import android.ahaonline.com.edan35.programs.ShaderBlur;
 import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.SkyBoxShaderProgram;
@@ -19,6 +18,8 @@ import android.content.Context;
 import static android.opengl.GLES30.*;
 
 
+import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
@@ -50,9 +51,8 @@ public class Renderer implements GLSurfaceView.Renderer {
     private Camera camera;
     private ShaderLightProgram shaderLightProgram;
     private TextureShaderProgram textureShaderProgram, textureShaderProgram2;
-    private ShaderBlur shaderBlur;
-
     private FrameShaderProgram frameShaderProgram;
+    private ShaderTestProgram shaderTestProgram;
     private ArrayList<Model> asteroids = new ArrayList<>();
     private ArrayList<Model> lights = new ArrayList<>();
     private Model spaceship;
@@ -78,8 +78,6 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final int[] frameBuffer = new int[1];
     private final int[] texColorBuffer = new int[2];
     private final int[] rbo = new int[1];
-    private final int pingpongFBO[] = new int[2];
-    private final int pingpongColorbuffers[]  = new int[2];
 
     private int height;
     private int width;
@@ -112,7 +110,9 @@ public class Renderer implements GLSurfaceView.Renderer {
         for(int i = 0; i < 3; i++) {
             Model light = new Model();
             light.loadModel(context, R.raw.light);
-            light.lightVariables(new float[]{1f,1f,1f}, new float[]{1f,1f,1f}, new float[]{1f,1f,1f}, 1.0f, 0.007f, 0.0002f);
+            light.lightVariables(new float[]{randomNumber(0.5f,1.0f),randomNumber(0.5f,1.0f),randomNumber(0.5f,1.0f)}
+                    , new float[]{randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f)},
+                    new float[]{randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f)}, 1.0f, 0.007f, 0.0002f);
             light.scale(randomNumber(1.0f,5.0f));
             float x = randomNumber(-10.0f,10.0f);
             float y = randomNumber(-10.0f,10.0f);
@@ -123,7 +123,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         }
 
         spaceship = new Model();
-        spaceship.loadModel(context, R.raw.spaceship);
+        spaceship.loadModel(context, R.raw.spaceship1);
         spaceship.translate(0,0,0);
         spaceship.rotateX(45f);
         spaceship.scale(10f);
@@ -133,11 +133,11 @@ public class Renderer implements GLSurfaceView.Renderer {
         //Textures
         textureShaderProgram = new TextureShaderProgram(context);
         textureShaderProgram2 = new TextureShaderProgram(context);
-        shaderBlur = new ShaderBlur(context);
+        shaderTestProgram = new ShaderTestProgram(context);
         skyboxProgram = new SkyBoxShaderProgram(context);
         shaderLightProgram = new ShaderLightProgram(context);
         frameShaderProgram = new FrameShaderProgram(context);
-        texture3 = TextureHelper.loadTexture(context, R.drawable.spaceship);
+        texture3 = TextureHelper.loadTexture(context, R.drawable.metal);
         texture = TextureHelper.loadTexture(context, R.drawable.container2);
         texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
 
@@ -205,39 +205,20 @@ public class Renderer implements GLSurfaceView.Renderer {
         //drawSpaceship();
         drawLights();
         drawSkybox();
-        camera.rotateX(1f);
-        camera.transformMatrix();
+
 
 
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        boolean horizontal = true, first_iteration = true;
-        int amount = 10;
-        shaderBlur.useProgram();
-        for (int i = 0; i < amount; i++)
-        {
-            glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal ? 1 : 0]);
-            glUniform1i(glGetUniformLocation(shaderBlur.getProgram(), "horizontal"), horizontal ? 1 : 0);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, first_iteration ? texColorBuffer[1] : pingpongColorbuffers[horizontal ? 0 : 1]);  // bind texture of other framebuffer (or scene if first iteration)
-            glUniform1i(glGetUniformLocation(shaderBlur.getProgram(), "image"), 0);
-            screenOverlay.bindShader(shaderBlur);
-            screenOverlay.draw();
-            horizontal = !horizontal;
-            if (first_iteration)
-                first_iteration = false;
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
 
 
-
-
+        frameShaderProgram.useProgram();
+        screenOverlay.bindShader(frameShaderProgram);
+        frameShaderProgram.setUniforms(texColorBuffer[0], texColorBuffer[1]);
+        screenOverlay.draw();
 
 
     }
@@ -286,23 +267,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         int[] attachments = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
         glDrawBuffers(2, attachments, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-        glGenFramebuffers(2, pingpongFBO, 0);
-        glGenTextures(2, pingpongColorbuffers, 0);
-        for (int i = 0; i < 2; i++)
-        {
-            glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-            glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, null);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // We clamp to the edge as the blur filter would otherwise sample repeated texture values!
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
-
-
-        }
 
 
 
@@ -359,15 +323,16 @@ public class Renderer implements GLSurfaceView.Renderer {
         multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, spaceship.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
-        textureShaderProgram2.useProgram();
-        spaceship.bindShader(textureShaderProgram2);
+        shaderTestProgram.useProgram();
+        spaceship.bindShader(shaderTestProgram);
         invertM(inversedMatrix, 0, spaceship.getModelMatrix(), 0);
         Matrix.transposeM(normalMatrix, 0, inversedMatrix, 0);
 
         invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
         Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
+        float[] color = new float[] {0.329412f, 0.329412f, 0.329412f};
 
-        textureShaderProgram2.setUniforms(modelViewProjectionMatrix, spaceship.getModelMatrix(), texture3, texture3, camera, lights, 1.0f);
+        shaderTestProgram.setUniforms(modelViewProjectionMatrix, texture3);
         spaceship.draw();
     }
 

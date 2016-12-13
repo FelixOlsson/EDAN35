@@ -1,10 +1,12 @@
+#version 300 es
 uniform mat4 u_MVPMatrix;
-uniform vec4 u_Color;
-attribute vec4 a_Position;
-attribute vec4 a_Color;
-varying vec4 test;
+
+in vec4 a_Position;
+in vec2 a_TextureCoordinates;
+
+out vec2 v_TextureCoordinates;
 
 void main() {
-    test = u_Color;
+    v_TextureCoordinates = a_TextureCoordinates;
     gl_Position =  u_MVPMatrix * a_Position;
 }
