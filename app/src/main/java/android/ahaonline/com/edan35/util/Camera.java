@@ -1,6 +1,13 @@
 package android.ahaonline.com.edan35.util;
 
 import android.opengl.Matrix;
+
+import static android.R.attr.rotationX;
+import static android.R.attr.rotationY;
+import static android.opengl.Matrix.rotateM;
+import static android.opengl.Matrix.scaleM;
+import static android.opengl.Matrix.setIdentityM;
+import static android.opengl.Matrix.translateM;
 import static java.lang.Math.*;
 
 /**
@@ -8,29 +15,104 @@ import static java.lang.Math.*;
  */
 public class Camera {
 
+    private float x, y, z;
+    private float rotationX, rotationY, rotationZ;
+    private float vel, rot;
+
+    //temporary values
+    private float tX = 0, tY = 0, tZ = 0;
+    private float tRotationX = 0, tRotationY = 0, tRotationZ = 0;
+    private float tSizeX = 1, tSizeY = 1, tSizeZ = 1;
+
 
     private static final float[] viewMatrix = new float[16];
 
     public Camera() {
-
+        setIdentityM(viewMatrix, 0);
     }
 
-    private float[] normalize(float[] vector) {
-        float length = (float)sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-        vector[0] = vector[0]/length;
-        vector[1] = vector[1]/length;
-        vector[2] = vector[2]/length;
 
-        return vector;
+    public void translate(float x, float y, float z) {
+        this.x += x;
+        tX = x;
+        this.y += y;
+        tY = y;
+        this.z += z;
+        tZ = z;
     }
 
-    private float[] cross(float[] v1, float[] v2) {
-        float[] result = new float[3];
-        result[0] = v1[1] * v2[2] - v2[1] * v1[2];
-        result[1] = v1[2] * v2[0] - v2[2] * v1[0];
-        result[2] = v1[0] * v2[1] - v2[0] * v1[1];
-
-        return result;
+    public void rotateX(float degree) {
+        rotationX += degree;
+        tRotationX = degree;
     }
+
+    public void rotateY(float degree) {
+        rotationY += degree;
+        tRotationY = degree;
+    }
+
+    public void rotateZ(float degree) {
+        rotationZ += degree;
+        tRotationZ = degree;
+    }
+
+    public void scale(float size) {
+        tSizeX = size;
+        tSizeY = size;
+        tSizeZ = size;
+    }
+
+    public void scaleX(float size) {
+        tSizeX += size;
+    }
+
+    public void scaleY(float size) {
+        tSizeY += size;
+    }
+
+    public void scaleZ(float size) {
+        tSizeZ += size;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public float getZ() {
+        return z;
+    }
+
+    public float[] getViewMatrix() {
+        return viewMatrix;
+    }
+    public void transformMatrix() {
+        scaleM(viewMatrix, 0, tSizeX, tSizeY, tSizeZ);
+        rotateM(viewMatrix, 0, tRotationX, 1f, 0f, 0f);
+        rotateM(viewMatrix, 0, tRotationY, 0f, 1f, 0f);
+        rotateM(viewMatrix, 0, tRotationZ, 0f, 0f, 1f);
+        translateM(viewMatrix, 0, tX, tY, tZ);
+
+        resetValues();
+    }
+
+    private void resetValues() {
+        tSizeX = 1;
+        tSizeY = 1;
+        tSizeZ = 1;
+
+        tRotationX = 0;
+        tRotationY = 0;
+        tRotationZ = 0;
+
+        tX = 0;
+        tY = 0;
+        tZ = 0;
+    }
+
+
 
 }

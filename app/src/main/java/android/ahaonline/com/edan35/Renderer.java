@@ -5,9 +5,11 @@ import android.ahaonline.com.edan35.Objects.Model;
 import android.ahaonline.com.edan35.Objects.ScreenOverlay;
 import android.ahaonline.com.edan35.Objects.SkyBox;
 import android.ahaonline.com.edan35.programs.FrameShaderProgram;
+import android.ahaonline.com.edan35.programs.ShaderBlur;
 import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.SkyBoxShaderProgram;
+import android.ahaonline.com.edan35.util.Camera;
 import android.ahaonline.com.edan35.util.Geometry;
 import android.ahaonline.com.edan35.util.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
@@ -45,9 +47,11 @@ import static android.ahaonline.com.edan35.util.Geometry.*;
 public class Renderer implements GLSurfaceView.Renderer {
 
     private Context context;
-    private ShaderTestProgram shaderTestProgram;
+    private Camera camera;
     private ShaderLightProgram shaderLightProgram;
     private TextureShaderProgram textureShaderProgram, textureShaderProgram2;
+    private ShaderBlur shaderBlur;
+
     private FrameShaderProgram frameShaderProgram;
     private ArrayList<Model> asteroids = new ArrayList<>();
     private ArrayList<Model> lights = new ArrayList<>();
@@ -55,10 +59,6 @@ public class Renderer implements GLSurfaceView.Renderer {
     private ScreenOverlay screenOverlay;
     private Light light;
     private Dialog loadScreen;
-
-    private float xRotation, yRotation;
-    private float cameraMovement = 1f;
-
     private SkyBoxShaderProgram skyboxProgram;
     private SkyBox skybox;
     private int skyboxTexture;
@@ -66,7 +66,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private int texture, texture2, texture3;
     private final float[] modelViewProjectionMatrix = new float[16];
     private final float[] projectionMatrix = new float[16];
-    private final float[] viewMatrix = new float[16];
+    private final float[] viewMatrixForSkybox = new float[16];
     private final float[] modelViewMatrix = new float[16];
     private final float[] normalMatrix = new float[16];
     private final float[] normalViewMatrix = new float[16];
@@ -76,8 +76,10 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final float[] viewProjectionMatrix = new float[16];
     private final float[] invertedViewProjectionMatrix = new float[16];
     private final int[] frameBuffer = new int[1];
-    private final int[] texColorBuffer = new int[1];
+    private final int[] texColorBuffer = new int[2];
     private final int[] rbo = new int[1];
+    private final int pingpongFBO[] = new int[2];
+    private final int pingpongColorbuffers[]  = new int[2];
 
     private int height;
     private int width;
@@ -94,12 +96,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-        textureShaderProgram = new TextureShaderProgram(context);
-        textureShaderProgram2 = new TextureShaderProgram(context);
-        frameShaderProgram = new FrameShaderProgram(context);
-        texture3 = TextureHelper.loadTexture(context, R.drawable.spaceship);
-        texture = TextureHelper.loadTexture(context, R.drawable.container2);
-        texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
+        // Objects
         for(int i = 0; i < 10; i++) {
             Model asteroid = new Model();
             asteroid.loadModel(context, R.raw.cube);
@@ -115,6 +112,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         for(int i = 0; i < 3; i++) {
             Model light = new Model();
             light.loadModel(context, R.raw.light);
+            light.lightVariables(new float[]{1f,1f,1f}, new float[]{1f,1f,1f}, new float[]{1f,1f,1f}, 1.0f, 0.007f, 0.0002f);
             light.scale(randomNumber(1.0f,5.0f));
             float x = randomNumber(-10.0f,10.0f);
             float y = randomNumber(-10.0f,10.0f);
@@ -130,24 +128,33 @@ public class Renderer implements GLSurfaceView.Renderer {
         spaceship.rotateX(45f);
         spaceship.scale(10f);
         spaceship.transformMatrix();
+        skybox = new SkyBox();
 
-
-        shaderTestProgram = new ShaderTestProgram(context);
+        //Textures
+        textureShaderProgram = new TextureShaderProgram(context);
+        textureShaderProgram2 = new TextureShaderProgram(context);
+        shaderBlur = new ShaderBlur(context);
+        skyboxProgram = new SkyBoxShaderProgram(context);
         shaderLightProgram = new ShaderLightProgram(context);
+        frameShaderProgram = new FrameShaderProgram(context);
+        texture3 = TextureHelper.loadTexture(context, R.drawable.spaceship);
+        texture = TextureHelper.loadTexture(context, R.drawable.container2);
+        texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
+
+
+        //Utility
+        camera = new Camera();
         light = new Light();
         screenOverlay = new ScreenOverlay();
-
-        skyboxProgram = new SkyBoxShaderProgram(context);
-        skybox = new SkyBox();
         skyboxTexture = TextureHelper.loadCubeMap(context,
                 new int[] {  R.drawable.spacert, R.drawable.spacelf,
-                          R.drawable.spaceup, R.drawable.spacedn,
-                          R.drawable.spacebk, R.drawable.spaceft});
+                        R.drawable.spaceup, R.drawable.spacedn,
+                        R.drawable.spacebk, R.drawable.spaceft});
 
         setIdentityM(projectionMatrix, 0);
         loadScreen.dismiss();
 
-
+        Matrix.setLookAtM(camera.getViewMatrix(), 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
     @Override
@@ -156,7 +163,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         float ratio = (float) width / height;
 
-        Matrix.perspectiveM(projectionMatrix, 0, 90f, ratio, 0.1f, 150f);
+        Matrix.perspectiveM(projectionMatrix, 0, 90f, ratio, 0.1f, 100f);
 
         postProcessingEffect(width,height);
 
@@ -176,20 +183,21 @@ public class Renderer implements GLSurfaceView.Renderer {
 
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(viewMatrix, 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-        rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
-        rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
+
+       // rotateM(camera.getViewMatrix(), 0, -45, 1f, 0f, 0f);
+        //rotateM(camera.getViewMatrix(), 0, -45, 0f, 1f, 0f);
         //translateM(viewMatrix, 0, 0,0,cameraMovement++);
 
+
         travleVector(light);
-        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, light.getModelMatrix(), 0);
+        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, light.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, camera.getViewMatrix(), 0);
         invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
 
         shaderLightProgram.useProgram();
         light.bindShader(shaderLightProgram);
-        shaderLightProgram.setUniforms(modelViewProjectionMatrix);
+        shaderLightProgram.setUniforms(modelViewProjectionMatrix, lights.get(0));
         light.draw();
 
 
@@ -197,18 +205,37 @@ public class Renderer implements GLSurfaceView.Renderer {
         //drawSpaceship();
         drawLights();
         drawSkybox();
+        camera.rotateX(1f);
+        camera.transformMatrix();
 
 
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        boolean horizontal = true, first_iteration = true;
+        int amount = 10;
+        shaderBlur.useProgram();
+        for (int i = 0; i < amount; i++)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal ? 1 : 0]);
+            glUniform1i(glGetUniformLocation(shaderBlur.getProgram(), "horizontal"), horizontal ? 1 : 0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, first_iteration ? texColorBuffer[1] : pingpongColorbuffers[horizontal ? 0 : 1]);  // bind texture of other framebuffer (or scene if first iteration)
+            glUniform1i(glGetUniformLocation(shaderBlur.getProgram(), "image"), 0);
+            screenOverlay.bindShader(shaderBlur);
+            screenOverlay.draw();
+            horizontal = !horizontal;
+            if (first_iteration)
+                first_iteration = false;
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
 
-        frameShaderProgram.useProgram();
-        screenOverlay.bindShader(frameShaderProgram);
-        frameShaderProgram.setUniforms(texColorBuffer[0]);
-        screenOverlay.draw();
+
 
 
 
@@ -219,12 +246,12 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private void drawSkybox() {
         glDepthFunc(GL_LEQUAL);
-        setIdentityM(viewMatrix, 0);
+        setIdentityM(viewMatrixForSkybox, 0);
         //rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
         //rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
-        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrixForSkybox, 0);
         skyboxProgram.useProgram();
-        skyboxProgram.setUniforms(projectionMatrix, viewMatrix, skyboxTexture);
+        skyboxProgram.setUniforms(projectionMatrix, viewMatrixForSkybox, skyboxTexture);
         skybox.bindData(skyboxProgram);
         skybox.draw();
         glDepthFunc(GL_LESS);
@@ -234,16 +261,21 @@ public class Renderer implements GLSurfaceView.Renderer {
         glGenFramebuffers(frameBuffer.length, frameBuffer, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer[0]);
 
-        glGenTextures(1, texColorBuffer, 0);
-        glBindTexture(GL_TEXTURE_2D, texColorBuffer[0]);
+        glGenTextures(texColorBuffer.length, texColorBuffer, 0);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        for(int i = 0; i < 2; i++) {
+
+            glBindTexture(GL_TEXTURE_2D, texColorBuffer[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glBindTexture(GL_TEXTURE_2D, 0);
 
 
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer[0], 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texColorBuffer[i], 0);
+        }
 
         glGenRenderbuffers(1, rbo, 0);
         glBindRenderbuffer(GL_RENDERBUFFER, rbo[0]);
@@ -251,7 +283,30 @@ public class Renderer implements GLSurfaceView.Renderer {
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo[0]);
+        int[] attachments = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, attachments, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+        glGenFramebuffers(2, pingpongFBO, 0);
+        glGenTextures(2, pingpongColorbuffers, 0);
+        for (int i = 0; i < 2; i++)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+            glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, null);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // We clamp to the edge as the blur filter would otherwise sample repeated texture values!
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
+
+
+        }
+
+
+
+
     }
 
     private void drawAsteroids() {
@@ -261,7 +316,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             asteroid.translate(0 , 0, - 0.01f);
 
             asteroid.transformMatrix();
-            multiplyMM(modelViewMatrix, 0, viewMatrix, 0, asteroid.getModelMatrix(), 0);
+            multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, asteroid.getModelMatrix(), 0);
             Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
             textureShaderProgram.useProgram();
@@ -272,7 +327,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
             Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
 
-            textureShaderProgram.setUniforms(modelViewProjectionMatrix, asteroid.getModelMatrix(), texture, light, normalMatrix, new float[]{0, 0, 0f}, normalViewMatrix, texture2);
+            textureShaderProgram.setUniforms(modelViewProjectionMatrix, asteroid.getModelMatrix(), texture, texture2, camera, lights, 1.0f);
             asteroid.draw();
         }
 
@@ -286,12 +341,12 @@ public class Renderer implements GLSurfaceView.Renderer {
             light.translate(0 , 0, - 0.01f);
 
             light.transformMatrix();
-            multiplyMM(modelViewMatrix, 0, viewMatrix, 0, light.getModelMatrix(), 0);
+            multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, light.getModelMatrix(), 0);
             Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
             shaderLightProgram.useProgram();
             light.bindShader(shaderLightProgram);
-            shaderLightProgram.setUniforms(modelViewProjectionMatrix);
+            shaderLightProgram.setUniforms(modelViewProjectionMatrix, light);
             light.draw();
         }
 
@@ -301,7 +356,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     public void drawSpaceship() {
         spaceship.rotateX(0.5f);
         spaceship.transformMatrix();
-        multiplyMM(modelViewMatrix, 0, viewMatrix, 0, spaceship.getModelMatrix(), 0);
+        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, spaceship.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
         textureShaderProgram2.useProgram();
@@ -312,7 +367,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
         Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
 
-        textureShaderProgram2.setUniforms(modelViewProjectionMatrix, spaceship.getModelMatrix(), texture3, light, normalMatrix, new float[]{0, 0, 0f}, normalViewMatrix, texture3);
+        textureShaderProgram2.setUniforms(modelViewProjectionMatrix, spaceship.getModelMatrix(), texture3, texture3, camera, lights, 1.0f);
         spaceship.draw();
     }
 

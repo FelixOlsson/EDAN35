@@ -1,15 +1,14 @@
+#version 300 es
 uniform mat4 u_MVPMatrix;
 uniform mat4 u_MMatrix;
-uniform mat4 u_NormalMatrix;
 
-attribute vec3 a_Normal;
-attribute vec4 a_Position;
-attribute vec2 a_TextureCoordinates;
+in vec3 a_Normal;
+in vec4 a_Position;
+in vec2 a_TextureCoordinates;
 
-varying vec2 v_TextureCoordinates;
-varying vec3 v_FragPos;
-varying vec3 v_Normal;
-varying vec3 v_NormTest;
+out vec2 v_TextureCoordinates;
+out vec3 v_FragPos;
+out vec3 v_Normal;
 
 void main()
 {

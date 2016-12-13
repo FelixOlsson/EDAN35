@@ -4,6 +4,9 @@ import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
+
+import static android.R.interpolator.linear;
+import static android.ahaonline.com.edan35.R.raw.light;
 import static android.opengl.GLES30.*;
 
 import java.io.BufferedReader;
@@ -30,6 +33,46 @@ public class Model extends transformController {
     private float vertexCoords[];
     private float uvCooords[];
     private float normals[];
+
+
+
+    //light
+
+    public float[] getAmbient() {
+        return ambient;
+    }
+
+    private float[] ambient;
+
+    public float[] getDiffuse() {
+        return diffuse;
+    }
+
+    private float[] diffuse;
+
+    public float[] getSpecular() {
+        return specular;
+    }
+
+    private float[] specular;
+
+    public float getConstant() {
+        return constant;
+    }
+
+    private float constant;
+
+    public float getLinear() {
+        return linear;
+    }
+
+    private float linear;
+
+    public float getQuadratic() {
+        return quadratic;
+    }
+
+    private float quadratic;
 
     public Model() {
         super();
@@ -184,5 +227,15 @@ public class Model extends transformController {
         }
 
         return newIndexedList;
+    }
+
+    public void lightVariables(float[] ambient, float[] diffuse, float[] specular, float constant, float linear, float quadratic) {
+        this.ambient = ambient;
+        this.diffuse = diffuse;
+        this.specular = specular;
+        this.constant = constant;
+        this.linear = linear;
+        this.quadratic = quadratic;
+
     }
 }

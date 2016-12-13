@@ -6,10 +6,10 @@ package android.ahaonline.com.edan35.Objects;
 
 import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.FrameShaderProgram;
+import android.ahaonline.com.edan35.programs.ShaderBlur;
+import android.ahaonline.com.edan35.programs.ShaderProgram;
 
-import static android.opengl.GLES20.GL_TRIANGLES;
-import static android.opengl.GLES20.glDisableVertexAttribArray;
-import static android.opengl.GLES20.glDrawArrays;
+import static android.opengl.GLES30.*;
 
 
 
@@ -21,7 +21,8 @@ public class ScreenOverlay  {
 
     private VertexBuffer vertexBuffer;
     private VertexBuffer texCoordBuffer;
-    private FrameShaderProgram shader;
+    private FrameShaderProgram fshader;
+    private ShaderBlur bshader;
 
     public ScreenOverlay() {
 
@@ -49,7 +50,17 @@ public class ScreenOverlay  {
     };
 
     public void bindShader(FrameShaderProgram shaderLightProgram) {
-        this.shader = shaderLightProgram;
+        this.fshader = shaderLightProgram;
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderLightProgram.getPositionAttributeLocation(),
+                2, 0);
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderLightProgram.getTextureAttributeLocation(),
+                2, 0);
+    }
+
+    public void bindShader(ShaderBlur shaderLightProgram) {
+        this.bshader = shaderLightProgram;
         vertexBuffer.setVertexAttribPointer(0,
                 shaderLightProgram.getPositionAttributeLocation(),
                 2, 0);
@@ -61,7 +72,12 @@ public class ScreenOverlay  {
     public void draw() {
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDisableVertexAttribArray(shader.getPositionAttributeLocation());
-        glDisableVertexAttribArray(shader.getTextureAttributeLocation());
+        if(fshader != null) {
+            glDisableVertexAttribArray(fshader.getPositionAttributeLocation());
+            glDisableVertexAttribArray(fshader.getTextureAttributeLocation());
+        } else if(bshader != null) {
+            glDisableVertexAttribArray(bshader.getPositionAttributeLocation());
+            glDisableVertexAttribArray(bshader.getTextureAttributeLocation());
+        }
     }
 }
