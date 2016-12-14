@@ -16,17 +16,16 @@ import static android.ahaonline.com.edan35.util.Constants.BYTES_PER_FLOAT;
 public class ParticleSystem  extends transformController{
     private ParticleShaderProgram particleShaderProgram;
 
-    private static final int POSITION_COMPONENT_COUNT = 3;
-    private static final int COLOR_COMPONENT_COUNT = 3;
-    private static final int VECTOR_COMPONENT_COUNT = 3;
-    private static final int PARTICLE_START_TIME_COMPONENT_COUNT = 1;
+    private final float[] vert;
+    private final float[] col;
+    private final float[] vect;
+    private final float[] time;
 
-    private static final int TOTAL_COMPONENT_COUNT = POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT + VECTOR_COMPONENT_COUNT + PARTICLE_START_TIME_COMPONENT_COUNT;
+    private final VertexArray posArray;
+    private final VertexArray colorArray;
+    private final VertexArray vectArray;
+    private final VertexArray timeArray;
 
-    private static final int STRIDE = TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT;
-
-    private final float[] particles;
-    private final VertexArray vertexArray;
     private final int maxParticleCount;
 
     private int currentParticleCount;
@@ -34,63 +33,77 @@ public class ParticleSystem  extends transformController{
 
     public ParticleSystem(int maxParticleCount) {
         super();
-        particles = new float[maxParticleCount * TOTAL_COMPONENT_COUNT];
-        vertexArray = new VertexArray(particles);
+        vert = new float[maxParticleCount * 3];
+        col = new float[maxParticleCount * 3];
+        vect = new float[maxParticleCount * 3];
+        time = new float[maxParticleCount * 1];
+        posArray = new VertexArray(vert);
+        colorArray = new VertexArray(col);
+        vectArray = new VertexArray(vect);
+        timeArray = new VertexArray(time);
         this.maxParticleCount = maxParticleCount;
     }
 
     public void addParticle(float[] position, int color, float[] direction, float particleStartTime) {
 
-        final int particleOffset = nextParticle * TOTAL_COMPONENT_COUNT;
-        int currentOffset = particleOffset;
+        final int posNumber = nextParticle * 3;
+        final int colNumber = nextParticle * 3;
+        final int vecNumber = nextParticle * 3;
+        final int timeNumber = nextParticle * 1;
+        int posOffset = nextParticle * 3;
+        int colOffset = nextParticle * 3;
+        int vecOffset = nextParticle * 3;
+        int timeOffset = nextParticle * 1;
         nextParticle++;
 
         if (currentParticleCount < maxParticleCount) {
             currentParticleCount++;
         }
+
         if (nextParticle == maxParticleCount) {
             nextParticle = 0;
         }
 
-        particles[currentOffset++] = position[0];
-        particles[currentOffset++] = position[1];
-        particles[currentOffset++] = position[2];
+        vert[posOffset++] = position[0];
+        vert[posOffset++] = position[1];
+        vert[posOffset++] = position[2];
 
-        particles[currentOffset++] = Color.red(color) / 255f;
-        particles[currentOffset++] = Color.green(color) / 255f;
-        particles[currentOffset++] = Color.blue(color) / 255f;
+        col[colOffset++] = Color.red(color) / 255f;
+        col[colOffset++] = Color.green(color) / 255f;
+        col[colOffset++] = Color.blue(color) / 255f;
 
-        particles[currentOffset++] = direction[0];
-        particles[currentOffset++] = direction[1];
-        particles[currentOffset++] = direction[2];
+        vect[vecOffset++] = direction[0];
+        vect[vecOffset++] = direction[1];
+        vect[vecOffset++] = direction[2];
 
-        particles[currentOffset++] = particleStartTime;
+        time[timeOffset++] = particleStartTime;
 
-        vertexArray.updateBuffer(particles, particleOffset, TOTAL_COMPONENT_COUNT);
+        posArray.updateBuffer(vert, posNumber, 3);
+        colorArray.updateBuffer(col, colNumber, 3);
+        vectArray.updateBuffer(vect, vecNumber, 3);
+        timeArray.updateBuffer(time, timeNumber, 1);
     }
 
     public void bindData(ParticleShaderProgram particleProgram) {
-        int dataOffset = 0;
+
 
         this.particleShaderProgram = particleProgram;
-        vertexArray.setVertexAttribPointer(dataOffset,
+        posArray.setVertexAttribPointer(0,
                 particleProgram.getPositionAttributeLocation(),
-                POSITION_COMPONENT_COUNT, STRIDE);
-        dataOffset += POSITION_COMPONENT_COUNT;
+                3, 0);
 
-        vertexArray.setVertexAttribPointer(dataOffset,
+        colorArray.setVertexAttribPointer(0,
                 particleProgram.getColorAttributeLocation(),
-                COLOR_COMPONENT_COUNT, STRIDE);
-        dataOffset += COLOR_COMPONENT_COUNT;
+                3, 0);
 
-        vertexArray.setVertexAttribPointer(dataOffset,
+        vectArray.setVertexAttribPointer(0,
                 particleProgram.getDirectionVectorAttributeLocation(),
-                VECTOR_COMPONENT_COUNT, STRIDE);
-        dataOffset += VECTOR_COMPONENT_COUNT;
+                3, 0);
 
-        vertexArray.setVertexAttribPointer(dataOffset,
+
+        timeArray.setVertexAttribPointer(0,
                 particleProgram.getParticleStartTimeAttributeLocation(),
-                PARTICLE_START_TIME_COMPONENT_COUNT, STRIDE);
+                1, 0);
     }
 
     public void draw() {
