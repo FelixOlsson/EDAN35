@@ -13,20 +13,13 @@ public class VertexBuffer {
 
     private final int bufferId;
 
-
-
     public VertexBuffer(float[] vertexData) {
 
-        // Allocate a buffer.
         final int buffers[] = new int[1];
         glGenBuffers(buffers.length, buffers, 0);
 
-        if(buffers[0] == 0) {
-            throw new RuntimeException("Could not create a new vertex buffer object.");
-        }
         bufferId = buffers[0];
 
-        // Bind to the buffer.
         glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 
 
@@ -37,11 +30,9 @@ public class VertexBuffer {
                 .put(vertexData);
         vertexArray.position(0);
 
-        // Transfer data from memory to GPU buffer.
         glBufferData(GL_ARRAY_BUFFER, vertexArray.capacity() * BYTES_PER_FLOAT,
                 vertexArray, GL_STATIC_DRAW);
 
-        // Unbinding the buffer
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
@@ -53,16 +44,12 @@ public class VertexBuffer {
      */
     public void setVertexAttribPointer(int dataOffset, int attributeLocation,
                                        int componentCount, int stride) {
-        //Rebinding the buffer
         glBindBuffer(GL_ARRAY_BUFFER, bufferId);
 
         glVertexAttribPointer(attributeLocation, componentCount, GL_FLOAT,
                 false, stride, dataOffset);
         glEnableVertexAttribArray(attributeLocation);
 
-        //Unbinding the buffer
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
     }
 }

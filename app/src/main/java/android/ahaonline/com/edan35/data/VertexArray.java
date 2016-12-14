@@ -4,17 +4,8 @@ package android.ahaonline.com.edan35.data;
  * Created by Felix on 2016-12-06.
  */
 
-/***
- * Excerpted from "OpenGL ES for Android",
- * published by The Pragmatic Bookshelf.
- * Copyrights apply to this code. It may not be used to create training material,
- * courses, books, articles, and the like. Contact us if you are in doubt.
- * We make no guarantees that this code is fit for any purpose.
- * Visit http://www.pragmaticprogrammer.com/titles/kbogla for more book information.
- ***/
 
 import java.nio.FloatBuffer;
-
 
 import static android.ahaonline.com.edan35.util.Constants.BYTES_PER_FLOAT;
 import static android.opengl.GLES30.*;
@@ -44,10 +35,6 @@ public class VertexArray {
         floatBuffer.position(0);
     }
 
-    /**
-     * Updates the float buffer with the specified vertex data, assuming that
-     * the vertex data and the float buffer are the same size.
-     */
     public void updateBuffer(float[] vertexData, int start, int count) {
         floatBuffer.position(start);
         floatBuffer.put(vertexData, start, count);

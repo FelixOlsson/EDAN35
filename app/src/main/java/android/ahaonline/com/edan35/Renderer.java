@@ -19,24 +19,17 @@ import android.app.Dialog;
 import android.content.Context;
 
 import static android.opengl.GLES30.*;
-
-
 import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-
 import java.util.ArrayList;
 import java.util.Random;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-
-
 import static android.opengl.Matrix.invertM;
 import static android.opengl.Matrix.multiplyMM;
 import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.rotateM;
-import static android.opengl.Matrix.scaleM;
 import static android.opengl.Matrix.setIdentityM;
 import static android.opengl.Matrix.translateM;
 import static android.ahaonline.com.edan35.util.Geometry.*;
@@ -79,6 +72,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final float[] inversedViewMatrix = new float[16];
     private final float[] viewProjectionMatrix = new float[16];
     private final float[] invertedViewProjectionMatrix = new float[16];
+    private final float[] modelMatrixForFire = new float[16];
     private final int[] frameBuffer = new int[1];
     private final int[] texColorBuffer = new int[2];
     private final int[] rbo = new int[1];
@@ -93,7 +87,6 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private int height;
     private int width;
-
 
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrameTime = 0.0f;
@@ -113,8 +106,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         particleProgram = new ParticleShaderProgram(context);
         particleSystem = new ParticleSystem(250);
         globalStartTime = System.nanoTime();
-        final Vector particleDirection = new Vector(0f, 0.5f, 0f);
-        redParticleShooter = new ParticleShooter(new Point(-1f, 0f, 0f), particleDirection, Color.rgb(255, 50, 5), angleVarianceInDegrees, speedVariance);
+        redParticleShooter = new ParticleShooter(new float[]{-1f, 0f, 0f}, new float[]{0f, -0.5f, 0f}, Color.rgb(255, 50, 5), angleVarianceInDegrees, speedVariance);
 
         // Objects
         for(int i = 0; i < 10; i++) {
@@ -178,6 +170,9 @@ public class Renderer implements GLSurfaceView.Renderer {
         loadScreen.dismiss();
 
         Matrix.setLookAtM(camera.getViewMatrix(), 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+        Matrix.setIdentityM(modelMatrixForFire, 0);
+        translateM(modelMatrixForFire, 0, 0, -4.5f ,0);
     }
 
     @Override
@@ -185,12 +180,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         glViewport(0, 0, width, height);
 
         float ratio = (float) width / height;
-
         Matrix.perspectiveM(projectionMatrix, 0, 90f, ratio, 0.1f, 100f);
-
         postProcessingEffect(width,height);
-
-
 
     }
 
@@ -203,15 +194,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         glEnable(GL_DEPTH_TEST);
 
 
-
-        // Set the camera position (View matrix)
-
-       // rotateM(camera.getViewMatrix(), 0, -45, 1f, 0f, 0f);
-        //rotateM(camera.getViewMatrix(), 0, -45, 0f, 1f, 0f);
-        //translateM(viewMatrix, 0, 0,0,cameraMovement++);
-
-
-        travleVector(light);
         multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, light.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, camera.getViewMatrix(), 0);
@@ -220,8 +202,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         shaderLightProgram.useProgram();
         light.bindShader(shaderLightProgram);
         shaderLightProgram.setUniforms(modelViewProjectionMatrix, lights.get(0));
-        //light.draw();
-
 
         drawAsteroids();
         drawSpaceship();
@@ -229,29 +209,20 @@ public class Renderer implements GLSurfaceView.Renderer {
         drawSkybox();
         drawFire();
 
-
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
 
-
         frameShaderProgram.useProgram();
         screenOverlay.bindShader(frameShaderProgram);
         frameShaderProgram.setUniforms(texColorBuffer[0], texColorBuffer[1]);
         screenOverlay.draw();
-
-
-
     }
-
-
 
     private void drawSkybox() {
         glDepthFunc(GL_LEQUAL);
         setIdentityM(viewMatrixForSkybox, 0);
-        //rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
-        //rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrixForSkybox, 0);
         skyboxProgram.useProgram();
         skyboxProgram.setUniforms(projectionMatrix, viewMatrixForSkybox, skyboxTexture);
@@ -290,9 +261,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         glDrawBuffers(2, attachments, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-
-
     }
 
     private void drawAsteroids() {
@@ -317,7 +285,6 @@ public class Renderer implements GLSurfaceView.Renderer {
             asteroid.draw();
         }
 
-
     }
 
     private void drawLights() {
@@ -336,12 +303,10 @@ public class Renderer implements GLSurfaceView.Renderer {
             light.draw();
         }
 
-
     }
 
     public void drawSpaceship() {
-        //spaceship.rotateX(0.5f);
-       //spaceship.transformMatrix();
+
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix,
                 0, spaceship.getModelMatrix(), 0);
         multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, spaceship.getModelMatrix(), 0);
@@ -365,77 +330,25 @@ public class Renderer implements GLSurfaceView.Renderer {
         return rand.nextFloat() * (max - min) + min;
     }
 
-    private void travleVector(Light light) {
-
-    }
 
     public void handleTouchDrag(float normalizedX, float normalizedY) {
 
-            Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
-
-            Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, 1));
-
-            Point touchedPoint = Geometry.intersectionPoint(ray, plane);
-            spaceshipPosition =
-                    new Point(touchedPoint.x, touchedPoint.y, 0);
-
             spaceship.translate(-normalizedX, 0, normalizedY);
-            //spaceship.translate(0, 0, 1.0f);
             spaceship.transformMatrix();
-
-
+            translateM(modelMatrixForFire, 0, -normalizedX, 0, normalizedY);
 
     }
 
     public void handleTouchPress(float normalizedX, float normalizedY) {
-        Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
-        Sphere spaceShipBoundingSphere = new Sphere(
-                new Point(spaceship.getX(), spaceship.getY(), spaceship.getZ()), 2.0f);
 
-        spaceshipPressed = Geometry.intersects(spaceShipBoundingSphere, ray);
 
-    }
-
-    private Ray convertNormalized2DPointToRay(
-            float normalizedX, float normalizedY) {
-
-        final float[] nearPointNdc = {normalizedX, normalizedY, -1, 1};
-        final float[] farPointNdc =  {normalizedX, normalizedY,  1, 1};
-
-        final float[] nearPointWorld = new float[4];
-        final float[] farPointWorld = new float[4];
-
-        multiplyMV(
-                nearPointWorld, 0, invertedViewProjectionMatrix, 0, nearPointNdc, 0);
-        multiplyMV(
-                farPointWorld, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
-
-        divideByW(nearPointWorld);
-        divideByW(farPointWorld);
-
-        Point nearPointRay =
-                new Point(nearPointWorld[0], nearPointWorld[1], nearPointWorld[2]);
-
-        Point farPointRay =
-                new Point(farPointWorld[0], farPointWorld[1], farPointWorld[2]);
-
-        return new Ray(nearPointRay,
-                Geometry.vectorBetween(nearPointRay, farPointRay));
-    }
-
-    private void divideByW(float[] vector) {
-        vector[0] /= vector[3];
-        vector[1] /= vector[3];
-        vector[2] /= vector[3];
     }
 
     private void drawFire() {
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
-        Matrix.setIdentityM(modelMatrix, 0);
-        translateM(modelMatrix, 0, 0, 15f ,0);
-        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrix, 0);
+        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrixForFire, 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
                 camera.getViewMatrix(), 0);

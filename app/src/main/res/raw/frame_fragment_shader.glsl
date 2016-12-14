@@ -20,17 +20,17 @@ void main()
             vec2(offset,  -offset)  // bottom-right
         );
 
-       /* float kernel[] = float[9](
+        float kernel[] = float[9](
             -1.0, -1.0, -1.0,
             -1.0,  8.0, -1.0,
             -1.0, -1.0, -1.0
-        );*/
+        );
 
-        float kernel[] = float[9](
+        /*float kernel[] = float[9](
             1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0,
             2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0,
             1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0
-        );
+        );*/
 
 
 

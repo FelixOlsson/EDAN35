@@ -31,7 +31,6 @@ public class TextureHelper {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
 
-        // Read in the resource
         final Bitmap bitmap = BitmapFactory.decodeResource(
                 context.getResources(), resourceId, options);
 
@@ -41,41 +40,24 @@ public class TextureHelper {
             glDeleteTextures(1, textureObjectIds, 0);
             return 0;
         }
-        // Bind to the texture in OpenGL
+
         glBindTexture(GL_TEXTURE_2D, textureObjectIds[0]);
 
-        // Set filtering: a default must be set, or the texture will be
-        // black.
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // Load the bitmap into the bound texture.
+
         texImage2D(GL_TEXTURE_2D, 0, bitmap, 0);
-
-
 
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        // Recycle the bitmap, since its data has been loaded into
-        // OpenGL.
         bitmap.recycle();
 
-        // Unbind from the texture.
         glBindTexture(GL_TEXTURE_2D, 0);
 
         return textureObjectIds[0];
 
     }
 
-    /**
-     * Loads a cubemap texture from the provided resources and returns the
-     * texture ID. Returns 0 if the load failed.
-     *
-     * @param context
-     * @param cubeResources
-     *            An array of resources corresponding to the cube map. Should be
-     *            provided in this order: left, right, bottom, top, front, back.
-     * @return
-     */
     public static int loadCubeMap(Context context, int[] cubeResources) {
 
         final int[] textureObjectIds = new int[1];

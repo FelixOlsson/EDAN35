@@ -36,10 +36,7 @@ public class ShaderBuilder {
 
         }
 
-        /**
-         * Links a vertex shader and a fragment shader together into an OpenGL
-         * program. Returns the OpenGL program object ID, or 0 if linking failed.
-         */
+
         private static int linkProgram(int vertexShaderId, int fragmentShaderId) {
 
             final int programObjectId = glCreateProgram();

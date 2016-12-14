@@ -30,11 +30,9 @@ public class ShaderTestProgram extends ShaderProgram {
         uMVPMatrixLocation = glGetUniformLocation(program, "u_MVPMatrix");
         uDiffuseTextureLocation = glGetUniformLocation(program, "u_Texture");
 
-
         //Attributes
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
         aTextureCoordinateLocation = glGetAttribLocation(program, A_TEXTURE_COORDINATES);
-
 
 }
 

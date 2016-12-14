@@ -38,9 +38,10 @@ public class ShaderProgram {
     protected static final String A_PARTICLE_START_TIME = "a_ParticleStartTime";
     // Shader program
     protected final int program;
+
     protected ShaderProgram(Context context, int vertexShaderResourceId,
                             int fragmentShaderResourceId) {
-        // Compile the shaders and link the program.
+
         program = ShaderBuilder.buildProgram(
                 ShaderResourceReader.readShaderFromResource(
                         context, vertexShaderResourceId),
@@ -48,7 +49,6 @@ public class ShaderProgram {
                         context, fragmentShaderResourceId));
     }
     public void useProgram() {
-        // Set the current OpenGL shader program to this program.
         glUseProgram(program);
     }
 

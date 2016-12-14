@@ -11,12 +11,11 @@ void main()
         sqrt(xDistance * xDistance + yDistance * yDistance);
     gl_FragColor = vec4(v_Color / v_ElapsedTime, 1.0);
 
-    if (distanceFromCenter > 0.5) {
+    if (distanceFromCenter > 0.3) {
         discard;
     } else {
         gl_FragColor = vec4(v_Color / v_ElapsedTime, 1.0);
     }
 
-    /*gl_FragColor = vec4(v_Color / v_ElapsedTime * 10.0f, 1.0)
-                 * texture2D(u_TextureUnit, gl_PointCoord);*/
+
 }
