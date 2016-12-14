@@ -22,8 +22,6 @@ import static android.opengl.GLES30.*;
 
 
 import android.graphics.Color;
-import android.opengl.GLES20;
-import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
@@ -90,6 +88,9 @@ public class Renderer implements GLSurfaceView.Renderer {
     private ParticleSystem particleSystem;
     private ParticleShooter redParticleShooter;
 
+    private boolean spaceshipPressed = false;
+    private Point spaceshipPosition;
+
     private int height;
     private int width;
 
@@ -105,8 +106,8 @@ public class Renderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
+        spaceshipPosition = new Point(0f, 0f, 0f);
+
         final float angleVarianceInDegrees = 25f;
         final float speedVariance = 5f;
         particleProgram = new ParticleShaderProgram(context);
@@ -118,7 +119,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         // Objects
         for(int i = 0; i < 10; i++) {
             Model asteroid = new Model();
-            asteroid.loadModel(context, R.raw.cube);
+            asteroid.loadModel(context, R.raw.asteroid1);
             asteroid.scale(randomNumber(1.0f,5.0f));
             float x = randomNumber(-25.0f,25.0f);
             float y = randomNumber(-25.0f,25.0f);
@@ -146,7 +147,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         spaceship = new Model();
         spaceship.loadModel(context, R.raw.spaceship1);
         spaceship.translate(0,0,0);
-        spaceship.rotateX(45f);
+        spaceship.rotateX(-90f);
         spaceship.scale(2f);
         spaceship.transformMatrix();
         skybox = new SkyBox();
@@ -159,7 +160,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         shaderLightProgram = new ShaderLightProgram(context);
         frameShaderProgram = new FrameShaderProgram(context);
         texture3 = TextureHelper.loadTexture(context, R.drawable.metal);
-        texture = TextureHelper.loadTexture(context, R.drawable.container2);
+        texture = TextureHelper.loadTexture(context, R.drawable.seamlessstonetexture);
         texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
         textureParticle = TextureHelper.loadTexture(context, R.drawable.particle_texture);
 
@@ -226,25 +227,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         drawSpaceship();
         drawLights();
         drawSkybox();
-
-        Matrix.setIdentityM(modelMatrix, 0);
-        translateM(modelMatrix, 0, 0, 15f ,0);
-        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrix, 0);
-        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
-                camera.getViewMatrix(), 0);
-
-        float currentTime = (System.nanoTime() - globalStartTime) / 1000000000f;
-        redParticleShooter.addParticles(particleSystem, currentTime, 5);
-
-        particleProgram.useProgram();
-        particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
-        particleSystem.bindData(particleProgram);
-        particleSystem.draw();
-
-        //glDisable(GL_BLEND);
-
-
+        drawFire();
 
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -358,7 +341,9 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     public void drawSpaceship() {
         //spaceship.rotateX(0.5f);
-        spaceship.transformMatrix();
+       //spaceship.transformMatrix();
+        multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix,
+                0, spaceship.getModelMatrix(), 0);
         multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, spaceship.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
@@ -384,19 +369,30 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     }
 
-    public void handleTouchDrag(float deltaX, float deltaY) {
-        System.out.println("coords: " + deltaX + " " + deltaY);
-        Ray ray = convertNormalized2DPointToRay(deltaX, deltaY);
-        spaceship.translate(ray.point.x,ray.point.y, 0);
-        System.out.println("coords: " + ray.point.x + " " + ray.point.y);
-        spaceship.transformMatrix();
+    public void handleTouchDrag(float normalizedX, float normalizedY) {
+
+            Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
+
+            Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, 1));
+
+            Point touchedPoint = Geometry.intersectionPoint(ray, plane);
+            spaceshipPosition =
+                    new Point(touchedPoint.x, touchedPoint.y, 0);
+
+            spaceship.translate(-normalizedX, 0, normalizedY);
+            //spaceship.translate(0, 0, 1.0f);
+            spaceship.transformMatrix();
+
+
+
     }
 
-    public void handleTouchPress(float deltaX, float deltaY) {
-        System.out.println("coords: " + deltaX + " " + deltaY);
-        Ray ray = convertNormalized2DPointToRay(deltaX, deltaY);
-        spaceship.translate(ray.point.x,ray.point.y, 0);
-        spaceship.transformMatrix();
+    public void handleTouchPress(float normalizedX, float normalizedY) {
+        Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
+        Sphere spaceShipBoundingSphere = new Sphere(
+                new Point(spaceship.getX(), spaceship.getY(), spaceship.getZ()), 2.0f);
+
+        spaceshipPressed = Geometry.intersects(spaceShipBoundingSphere, ray);
 
     }
 
@@ -431,6 +427,28 @@ public class Renderer implements GLSurfaceView.Renderer {
         vector[0] /= vector[3];
         vector[1] /= vector[3];
         vector[2] /= vector[3];
+    }
+
+    private void drawFire() {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+
+        Matrix.setIdentityM(modelMatrix, 0);
+        translateM(modelMatrix, 0, 0, 15f ,0);
+        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrix, 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
+                camera.getViewMatrix(), 0);
+
+        float currentTime = (System.nanoTime() - globalStartTime) / 1000000000f;
+        redParticleShooter.addParticles(particleSystem, currentTime, 5);
+
+        particleProgram.useProgram();
+        particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
+        particleSystem.bindData(particleProgram);
+        particleSystem.draw();
+
+        glDisable(GL_BLEND);
     }
 
 }
