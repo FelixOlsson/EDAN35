@@ -2,10 +2,9 @@ package android.ahaonline.com.edan35.Objects;
 
 import android.ahaonline.com.edan35.data.VertexArray;
 import android.ahaonline.com.edan35.programs.ParticleShaderProgram;
-import android.ahaonline.com.edan35.util.Geometry.*;
 import android.graphics.Color;
 
-import static android.opengl.GLES20.glDisableVertexAttribArray;
+
 import static android.opengl.GLES30.*;
 
 import static android.ahaonline.com.edan35.util.Constants.BYTES_PER_FLOAT;
@@ -14,18 +13,15 @@ import static android.ahaonline.com.edan35.util.Constants.BYTES_PER_FLOAT;
  * Created by Felix on 2016-12-13.
  */
 
-public class ParticleSystem {
+public class ParticleSystem  extends transformController{
     private ParticleShaderProgram particleShaderProgram;
+
     private static final int POSITION_COMPONENT_COUNT = 3;
     private static final int COLOR_COMPONENT_COUNT = 3;
     private static final int VECTOR_COMPONENT_COUNT = 3;
     private static final int PARTICLE_START_TIME_COMPONENT_COUNT = 1;
 
-    private static final int TOTAL_COMPONENT_COUNT =
-            POSITION_COMPONENT_COUNT
-                    + COLOR_COMPONENT_COUNT
-                    + VECTOR_COMPONENT_COUNT
-                    + PARTICLE_START_TIME_COMPONENT_COUNT;
+    private static final int TOTAL_COMPONENT_COUNT = POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT + VECTOR_COMPONENT_COUNT + PARTICLE_START_TIME_COMPONENT_COUNT;
 
     private static final int STRIDE = TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT;
 
@@ -43,11 +39,12 @@ public class ParticleSystem {
         this.maxParticleCount = maxParticleCount;
     }
 
-    public void addParticle(float[] position, int color, Vector direction,
-                            float particleStartTime) {
+    public void addParticle(float[] position, int color, float[] direction, float particleStartTime) {
+
         final int particleOffset = nextParticle * TOTAL_COMPONENT_COUNT;
         int currentOffset = particleOffset;
         nextParticle++;
+
         if (currentParticleCount < maxParticleCount) {
             currentParticleCount++;
         }
@@ -58,16 +55,18 @@ public class ParticleSystem {
         particles[currentOffset++] = position[0];
         particles[currentOffset++] = position[1];
         particles[currentOffset++] = position[2];
+
         particles[currentOffset++] = Color.red(color) / 255f;
         particles[currentOffset++] = Color.green(color) / 255f;
         particles[currentOffset++] = Color.blue(color) / 255f;
-        particles[currentOffset++] = direction.x;
-        particles[currentOffset++] = direction.y;
-        particles[currentOffset++] = direction.z;
+
+        particles[currentOffset++] = direction[0];
+        particles[currentOffset++] = direction[1];
+        particles[currentOffset++] = direction[2];
+
         particles[currentOffset++] = particleStartTime;
 
         vertexArray.updateBuffer(particles, particleOffset, TOTAL_COMPONENT_COUNT);
-
     }
 
     public void bindData(ParticleShaderProgram particleProgram) {

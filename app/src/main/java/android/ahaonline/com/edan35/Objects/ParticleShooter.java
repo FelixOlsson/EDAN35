@@ -10,7 +10,6 @@ import java.util.Random;
 import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.setRotateEulerM;
 
-import android.ahaonline.com.edan35.util.Geometry.*;
 
 
 public class ParticleShooter extends transformController{
@@ -51,10 +50,10 @@ public class ParticleShooter extends transformController{
 
             float speedAdjustment = 1f + random.nextFloat() * speedVariance;
 
-            Vector thisDirection = new Vector(
+            float[] thisDirection = new float[]{
                     resultVector[0] * speedAdjustment,
                     resultVector[1] * speedAdjustment,
-                    resultVector[2] * speedAdjustment);
+                    resultVector[2] * speedAdjustment};
 
 
             particleSystem.addParticle(position, color, thisDirection, currentTime);

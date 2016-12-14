@@ -12,7 +12,6 @@ import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.SkyBoxShaderProgram;
 import android.ahaonline.com.edan35.util.Camera;
-import android.ahaonline.com.edan35.util.Geometry;
 import android.ahaonline.com.edan35.util.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.app.Dialog;
@@ -28,11 +27,10 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import static android.opengl.Matrix.invertM;
 import static android.opengl.Matrix.multiplyMM;
-import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.rotateM;
 import static android.opengl.Matrix.setIdentityM;
 import static android.opengl.Matrix.translateM;
-import static android.ahaonline.com.edan35.util.Geometry.*;
+
 /**
  * Created by felix on 15/11/2016.
  */
@@ -83,7 +81,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private ParticleShooter redParticleShooter;
 
     private boolean spaceshipPressed = false;
-    private Point spaceshipPosition;
+
 
     private int height;
     private int width;
@@ -99,7 +97,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        spaceshipPosition = new Point(0f, 0f, 0f);
+
 
         final float angleVarianceInDegrees = 25f;
         final float speedVariance = 5f;
