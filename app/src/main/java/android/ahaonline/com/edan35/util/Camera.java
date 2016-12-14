@@ -75,15 +75,15 @@ public class Camera {
     }
 
     public float getX() {
-        return x;
+        return viewMatrix[12];
     }
 
     public float getY() {
-        return y;
+        return  viewMatrix[13];
     }
 
     public float getZ() {
-        return z;
+        return  viewMatrix[14];
     }
 
     public float[] getViewMatrix() {

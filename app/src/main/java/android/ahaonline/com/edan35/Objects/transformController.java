@@ -69,15 +69,15 @@ public class transformController {
     }
 
     public float getX() {
-        return x;
+        return modelMatrix[12];
     }
 
     public float getY() {
-        return y;
+        return modelMatrix[13];
     }
 
     public float getZ() {
-        return z;
+        return modelMatrix[14];
     }
 
     public float[] getModelMatrix() {
