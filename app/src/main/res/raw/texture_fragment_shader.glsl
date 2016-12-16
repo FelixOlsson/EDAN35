@@ -52,8 +52,8 @@ void main()
     for(int i = 0; i < 3; i++) {
         result += CalcPointLight(light[i], norm, v_FragPos, viewDir) ;
     }
-    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
 
+    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
            BrightColor = vec4( 0.0f);
 
     FragColor = vec4(result, 1.0f);

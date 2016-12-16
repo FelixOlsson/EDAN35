@@ -115,7 +115,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         particleProgram = new ParticleShaderProgram(context);
         particleSystem = new ParticleSystem(250);
         globalStartTime = System.nanoTime();
-        redParticleShooter = new ParticleShooter(new float[]{-1f, 0f, 0f}, new float[]{0f, -0.5f, 0f}, Color.rgb(255, 50, 5), angleVarianceInDegrees, speedVariance);
+        redParticleShooter = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees, speedVariance);
 
         // Objects
         for(int i = 0; i < 10; i++) {
@@ -133,7 +133,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         for(int i = 0; i < 3; i++) {
             Model light = new Model();
             light.loadModel(context, R.raw.light);
-            light.lightVariables(new float[]{randomNumber(0.3f,0.5f),randomNumber(0.3f,0.5f),randomNumber(0.3f,0.5f)}
+            light.lightVariables(new float[]{randomNumber(0.3f,10.5f),randomNumber(0.3f,0.5f),randomNumber(0.3f,0.5f)}
                     , new float[]{randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f)},
                     new float[]{randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f)}, 1.0f, 0.007f, 0.0002f);
             light.scale(randomNumber(1.0f,5.0f));
@@ -353,8 +353,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         spaceship.setIdentitiy();
         spaceship.translate(touchedPoint.x, touchedPoint.y, 0);
         spaceship.transformMatrix();
-        //setIdentityM(modelMatrixForFire, 0);
-        // translateM(modelMatrixForFire, 0, convertNormalized2DPointToRay(normalizedX, normalizedY)[0], 0, convertNormalized2DPointToRay(normalizedX, normalizedY)[0]);
+        setIdentityM(modelMatrixForFire, 0);
+        translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.4f, -1);
 
     }
 
@@ -391,17 +391,13 @@ public class Renderer implements GLSurfaceView.Renderer {
         final float[] nearPointWorld = new float[4];
         final float[] farPointWorld = new float[4];
 
-        multiplyMV(
-                nearPointWorld, 0, invertedViewProjectionMatrix, 0, nearPointNdc, 0);
-        multiplyMV(
-                farPointWorld, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
+        multiplyMV(nearPointWorld, 0, invertedViewProjectionMatrix, 0, nearPointNdc, 0);
+        multiplyMV(farPointWorld, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
 
 
-        Point nearPointRay =
-                new Point(nearPointWorld[0]/nearPointWorld[3], nearPointWorld[1]/nearPointWorld[3], nearPointWorld[2]/nearPointWorld[3]);
+        Point nearPointRay = new Point(nearPointWorld[0]/nearPointWorld[3], nearPointWorld[1]/nearPointWorld[3], nearPointWorld[2]/nearPointWorld[3]);
 
-        Point farPointRay =
-                new Point(farPointWorld[0]/farPointWorld[3], farPointWorld[1]/farPointWorld[3], farPointWorld[2]/farPointWorld[3]);
+        Point farPointRay = new Point(farPointWorld[0]/farPointWorld[3], farPointWorld[1]/farPointWorld[3], farPointWorld[2]/farPointWorld[3]);
 
         return new Ray(nearPointRay,
                 Geometry.vectorBetween(nearPointRay, farPointRay));
