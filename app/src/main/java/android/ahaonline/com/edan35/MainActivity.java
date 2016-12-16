@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
                     final float normalizedY =
                             -(event.getY() / (float) v.getHeight() * 2 - 1);
 
+
+
                     if(event.getAction() == MotionEvent.ACTION_DOWN) {
                         mGLView.queueEvent(new Runnable() {
                             @Override

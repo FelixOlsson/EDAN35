@@ -8,6 +8,7 @@ import android.content.Context;
 
 import java.util.ArrayList;
 
+import static android.R.interpolator.linear;
 import static android.opengl.GLES30.*;
 /**
  * Created by Felix on 2016-11-24.
@@ -26,6 +27,7 @@ public class TextureShaderProgram extends ShaderProgram {
     private final int uDiffuseTextureLocation;
     private final int uSpecularTextureLocation;
     private final int uShininessLocation;
+
 
 
     // Attribute locations
@@ -74,15 +76,9 @@ public class TextureShaderProgram extends ShaderProgram {
         glBindTexture(GL_TEXTURE_2D, textureSpecular);
 
         glUniform1i(uSpecularTextureLocation, 0);
-        String pre = "light[";
-        String post = "].";
-        String position = "position";
-        String ambient = "ambient";
-        String diffuse = "diffuse";
-        String specular = "specular";
-        String constant = "constant";
-        String linear = "linear";
-        String quadratic = "quadratic";
+        String pre = "light[", post = "].", position = "position", ambient = "ambient", diffuse = "diffuse",
+                specular = "specular", constant = "constant", linear = "linear", quadratic = "quadratic";
+
         for(int i = 0; i < lights.size(); i++) {
             glUniform3f(glGetUniformLocation(program, pre + i + post + position), lights.get(i).getX(), lights.get(i).getY(), lights.get(i).getZ());
             glUniform3f(glGetUniformLocation(program, pre + i + post + ambient), lights.get(i).getAmbient()[0], lights.get(i).getAmbient()[1], lights.get(i).getAmbient()[2]);
@@ -92,6 +88,17 @@ public class TextureShaderProgram extends ShaderProgram {
             glUniform1f(glGetUniformLocation(program, pre + i + post + linear), lights.get(i).getLinear());
             glUniform1f(glGetUniformLocation(program, pre + i + post + quadratic), lights.get(i).getLinear());
         }
+
+        float[] directionVec  = new float[]{-0.2f, -1.0f, -0.3f};
+        float[] ambientVec = new float[]{0.05f, 0.05f, 0.05f};
+        float[] diffuseVec  = new float[]{0.4f, 0.4f, 0.4f};
+        float[] specularVec  = new float[]{0.5f, 0.5f, 0.5f};
+
+        glUniform3f(glGetUniformLocation(program,"dirLight.direction"),directionVec[0], directionVec[1], directionVec[2]);
+        glUniform3f(glGetUniformLocation(program,"dirLight.ambient"), ambientVec[0], ambientVec[1], ambientVec[2]);
+        glUniform3f(glGetUniformLocation(program,"dirLight.diffuse"), diffuseVec[0], diffuseVec[1], diffuseVec[2]);
+        glUniform3f(glGetUniformLocation(program,"dirLight.specular"), specularVec[0], specularVec[1], specularVec[2]);
+
 
     }
 

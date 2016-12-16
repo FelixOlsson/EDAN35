@@ -19,17 +19,25 @@ import android.content.Context;
 
 import static android.opengl.GLES30.*;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Log;
+
 import java.util.ArrayList;
+
+import java.util.List;
 import java.util.Random;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import static android.opengl.Matrix.invertM;
 import static android.opengl.Matrix.multiplyMM;
+import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.rotateM;
 import static android.opengl.Matrix.setIdentityM;
 import static android.opengl.Matrix.translateM;
+
+
 
 /**
  * Created by felix on 15/11/2016.
@@ -39,6 +47,7 @@ import static android.opengl.Matrix.translateM;
 
 
 public class Renderer implements GLSurfaceView.Renderer {
+
 
     private Context context;
     private Camera camera;
@@ -55,6 +64,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private SkyBoxShaderProgram skyboxProgram;
     private SkyBox skybox;
     private int skyboxTexture;
+
 
     private int texture, texture2, texture3;
     private int textureParticle;
@@ -81,7 +91,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private ParticleShooter redParticleShooter;
 
     private boolean spaceshipPressed = false;
-
+    private ArrayList<List> ar;
 
     private int height;
     private int width;
@@ -122,7 +132,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         for(int i = 0; i < 3; i++) {
             Model light = new Model();
             light.loadModel(context, R.raw.light);
-            light.lightVariables(new float[]{randomNumber(0.5f,1.0f),randomNumber(0.5f,1.0f),randomNumber(0.5f,1.0f)}
+            light.lightVariables(new float[]{randomNumber(0.3f,0.5f),randomNumber(0.3f,0.5f),randomNumber(0.3f,0.5f)}
                     , new float[]{randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f)},
                     new float[]{randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f)}, 1.0f, 0.007f, 0.0002f);
             light.scale(randomNumber(1.0f,5.0f));
@@ -138,7 +148,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         spaceship.loadModel(context, R.raw.spaceship1);
         spaceship.translate(0,0,0);
         spaceship.rotateX(-90f);
-        spaceship.scale(2f);
+        //spaceship.scale(2f);
         spaceship.transformMatrix();
         skybox = new SkyBox();
 
@@ -178,6 +188,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         glViewport(0, 0, width, height);
 
         float ratio = (float) width / height;
+        this.width = width;
+        this.height = height;
         Matrix.perspectiveM(projectionMatrix, 0, 90f, ratio, 0.1f, 100f);
         postProcessingEffect(width,height);
 
@@ -233,7 +245,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         glGenFramebuffers(frameBuffer.length, frameBuffer, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer[0]);
 
-        glGenTextures(texColorBuffer.length, texColorBuffer, 0);
+        glGenTextures(2, texColorBuffer, 0);
 
         for(int i = 0; i < 2; i++) {
 
@@ -243,21 +255,23 @@ public class Renderer implements GLSurfaceView.Renderer {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glBindTexture(GL_TEXTURE_2D, 0);
-
 
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texColorBuffer[i], 0);
         }
 
+
+
         glGenRenderbuffers(1, rbo, 0);
         glBindRenderbuffer(GL_RENDERBUFFER, rbo[0]);
-
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo[0]);
+
+
         int[] attachments = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
         glDrawBuffers(2, attachments, 0);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
     }
 
@@ -330,15 +344,19 @@ public class Renderer implements GLSurfaceView.Renderer {
 
 
     public void handleTouchDrag(float normalizedX, float normalizedY) {
-
-            spaceship.translate(-normalizedX, 0, normalizedY);
+            spaceship.setIdentitiy();
+            spaceship.translate(convertNormalized2DPointToRay(normalizedX, normalizedY)[0], convertNormalized2DPointToRay(normalizedX, normalizedY)[1], 0);
+        //spaceship.translate(GetWorldCoords(normalizedX, normalizedY)[0], GetWorldCoords(normalizedX, normalizedY)[1], 0);
             spaceship.transformMatrix();
-            translateM(modelMatrixForFire, 0, -normalizedX, 0, normalizedY);
+            setIdentityM(modelMatrixForFire, 0);
+            translateM(modelMatrixForFire, 0, convertNormalized2DPointToRay(normalizedX, normalizedY)[0], 0, convertNormalized2DPointToRay(normalizedX, normalizedY)[0]);
 
     }
 
     public void handleTouchPress(float normalizedX, float normalizedY) {
-
+            System.out.println(GetWorldCoords(normalizedX, normalizedY)[0]);
+            System.out.println(GetWorldCoords(normalizedX, normalizedY)[1]);
+            System.out.println(convertNormalized2DPointToRay(normalizedX, normalizedY)[2]);
 
     }
 
@@ -361,5 +379,91 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         glDisable(GL_BLEND);
     }
+
+    private float[] convertNormalized2DPointToRay(
+            float normalizedX, float normalizedY) {
+
+        final float[] nearPointNdc = {normalizedX, normalizedY, -1, 1};
+        final float[] farPointNdc = {normalizedX, normalizedY, 1, 1};
+        final float[] nearPointWorld = new float[4];
+        final float[] farPointWorld = new float[4];
+        multiplyMV(
+                nearPointWorld, 0, invertedViewProjectionMatrix, 0, nearPointNdc, 0);
+        multiplyMV(
+                farPointWorld, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
+
+
+        divideByW(nearPointWorld);
+        divideByW(farPointWorld);
+
+        return new float[]{farPointWorld[0],farPointWorld[1] , farPointWorld[2]};
+    }
+
+    private void divideByW(float[] vector) {
+        vector[0] /= vector[3];
+        vector[1] /= vector[3];
+        vector[2] /= vector[3];
+    }
+
+    public float[] GetWorldCoords(float normalizedX, float normalizedY)
+    {
+        // Initialize auxiliary variables.
+        float[] worldPos = new float[2];
+
+
+
+        // Auxiliary matrix and vectors
+        // to deal with ogl.
+        float[] invertedMatrix, transformMatrix,
+                normalizedInPoint, outPoint, modelView;
+        invertedMatrix = new float[16];
+        transformMatrix = new float[16];
+        normalizedInPoint = new float[4];
+        modelView = new float[16];
+        outPoint = new float[4];
+
+
+       /* Transform the screen point to clip
+       space in ogl (-1,1) */
+        normalizedInPoint[0] = normalizedX;
+        normalizedInPoint[1] = normalizedY;
+        normalizedInPoint[2] = - 1.0f;
+        normalizedInPoint[3] = 1.0f;
+
+       /* Obtain the transform matrix and
+       then the inverse. */
+
+        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, spaceship.getModelMatrix(), 0);
+
+        Matrix.multiplyMM(
+                transformMatrix, 0,
+                projectionMatrix, 0,
+                modelViewMatrix, 0);
+
+        Matrix.invertM(invertedMatrix, 0,
+                transformMatrix, 0);
+
+       /* Apply the inverse to the point
+       in clip space */
+        Matrix.multiplyMV(
+                outPoint, 0,
+                invertedMatrix, 0,
+                normalizedInPoint, 0);
+
+        if (outPoint[3] == 0.0)
+        {
+            // Avoid /0 error.
+            Log.e("World coords", "ERROR!");
+            return worldPos;
+        }
+
+        // Divide by the 3rd component to find
+        // out the real position.
+        worldPos = new float[]{outPoint[0] / outPoint[3], outPoint[1] / outPoint[3]};
+
+        return worldPos;
+    }
+
+
 
 }

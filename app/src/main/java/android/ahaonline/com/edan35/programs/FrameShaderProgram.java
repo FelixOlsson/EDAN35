@@ -47,11 +47,13 @@ public class FrameShaderProgram extends ShaderProgram {
 
         glUniform1i(uTextureLocation, 0);
 
+
         glActiveTexture(GL_TEXTURE1);
 
         glBindTexture(GL_TEXTURE_2D, textureid2);
 
-        glUniform1i(uBlurrTexLocation, 0);
+        glUniform1i(uBlurrTexLocation, 1);
+
     }
 
     public int getPositionAttributeLocation() {

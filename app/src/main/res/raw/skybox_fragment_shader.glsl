@@ -8,6 +8,8 @@ in vec3 v_Position;
 	    	   								
 void main()                    		
 {
+
 	FragColor = texture(u_TextureUnit, v_Position);
+	BrightColor = vec4(0.0f);
 
 }

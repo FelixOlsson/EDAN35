@@ -9,6 +9,7 @@ uniform sampler2D u_Texture;
 
 void main() {
     FragColor = vec4(vec3(texture(u_Texture, v_TextureCoordinates).rgb * 0.2f),1.0f);
+    BrightColor = vec4(0.0f);
 
 }
 

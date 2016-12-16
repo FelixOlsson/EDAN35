@@ -124,5 +124,9 @@ public class transformController {
         return rot;
     }
 
+    public void setIdentitiy() {
+        setIdentityM(modelMatrix, 0);
+    }
+
 
 }
