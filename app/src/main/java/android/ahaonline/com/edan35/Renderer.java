@@ -12,14 +12,15 @@ import android.ahaonline.com.edan35.programs.ShaderLightProgram;
 import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.SkyBoxShaderProgram;
 import android.ahaonline.com.edan35.util.Camera;
+import android.ahaonline.com.edan35.util.Geometry;
 import android.ahaonline.com.edan35.util.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.app.Dialog;
 import android.content.Context;
+import static android.ahaonline.com.edan35.util.Geometry.*;
 
 import static android.opengl.GLES30.*;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
@@ -344,19 +345,20 @@ public class Renderer implements GLSurfaceView.Renderer {
 
 
     public void handleTouchDrag(float normalizedX, float normalizedY) {
-            spaceship.setIdentitiy();
-            spaceship.translate(convertNormalized2DPointToRay(normalizedX, normalizedY)[0], convertNormalized2DPointToRay(normalizedX, normalizedY)[1], 0);
-        //spaceship.translate(GetWorldCoords(normalizedX, normalizedY)[0], GetWorldCoords(normalizedX, normalizedY)[1], 0);
-            spaceship.transformMatrix();
-            setIdentityM(modelMatrixForFire, 0);
-            translateM(modelMatrixForFire, 0, convertNormalized2DPointToRay(normalizedX, normalizedY)[0], 0, convertNormalized2DPointToRay(normalizedX, normalizedY)[0]);
+        Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
+
+        Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, -1));
+
+        Point touchedPoint = Geometry.intersectionPoint(ray, plane);
+        spaceship.setIdentitiy();
+        spaceship.translate(touchedPoint.x, touchedPoint.y, 0);
+        spaceship.transformMatrix();
+        //setIdentityM(modelMatrixForFire, 0);
+        // translateM(modelMatrixForFire, 0, convertNormalized2DPointToRay(normalizedX, normalizedY)[0], 0, convertNormalized2DPointToRay(normalizedX, normalizedY)[0]);
 
     }
 
     public void handleTouchPress(float normalizedX, float normalizedY) {
-            System.out.println(GetWorldCoords(normalizedX, normalizedY)[0]);
-            System.out.println(GetWorldCoords(normalizedX, normalizedY)[1]);
-            System.out.println(convertNormalized2DPointToRay(normalizedX, normalizedY)[2]);
 
     }
 
@@ -380,89 +382,33 @@ public class Renderer implements GLSurfaceView.Renderer {
         glDisable(GL_BLEND);
     }
 
-    private float[] convertNormalized2DPointToRay(
+    private Ray convertNormalized2DPointToRay(
             float normalizedX, float normalizedY) {
 
         final float[] nearPointNdc = {normalizedX, normalizedY, -1, 1};
-        final float[] farPointNdc = {normalizedX, normalizedY, 1, 1};
+        final float[] farPointNdc =  {normalizedX, normalizedY,  1, 1};
+
         final float[] nearPointWorld = new float[4];
         final float[] farPointWorld = new float[4];
+
         multiplyMV(
                 nearPointWorld, 0, invertedViewProjectionMatrix, 0, nearPointNdc, 0);
         multiplyMV(
                 farPointWorld, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
 
 
-        divideByW(nearPointWorld);
-        divideByW(farPointWorld);
+        Point nearPointRay =
+                new Point(nearPointWorld[0]/nearPointWorld[3], nearPointWorld[1]/nearPointWorld[3], nearPointWorld[2]/nearPointWorld[3]);
 
-        return new float[]{farPointWorld[0],farPointWorld[1] , farPointWorld[2]};
+        Point farPointRay =
+                new Point(farPointWorld[0]/farPointWorld[3], farPointWorld[1]/farPointWorld[3], farPointWorld[2]/farPointWorld[3]);
+
+        return new Ray(nearPointRay,
+                Geometry.vectorBetween(nearPointRay, farPointRay));
     }
 
-    private void divideByW(float[] vector) {
-        vector[0] /= vector[3];
-        vector[1] /= vector[3];
-        vector[2] /= vector[3];
-    }
-
-    public float[] GetWorldCoords(float normalizedX, float normalizedY)
-    {
-        // Initialize auxiliary variables.
-        float[] worldPos = new float[2];
 
 
-
-        // Auxiliary matrix and vectors
-        // to deal with ogl.
-        float[] invertedMatrix, transformMatrix,
-                normalizedInPoint, outPoint, modelView;
-        invertedMatrix = new float[16];
-        transformMatrix = new float[16];
-        normalizedInPoint = new float[4];
-        modelView = new float[16];
-        outPoint = new float[4];
-
-
-       /* Transform the screen point to clip
-       space in ogl (-1,1) */
-        normalizedInPoint[0] = normalizedX;
-        normalizedInPoint[1] = normalizedY;
-        normalizedInPoint[2] = - 1.0f;
-        normalizedInPoint[3] = 1.0f;
-
-       /* Obtain the transform matrix and
-       then the inverse. */
-
-        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, spaceship.getModelMatrix(), 0);
-
-        Matrix.multiplyMM(
-                transformMatrix, 0,
-                projectionMatrix, 0,
-                modelViewMatrix, 0);
-
-        Matrix.invertM(invertedMatrix, 0,
-                transformMatrix, 0);
-
-       /* Apply the inverse to the point
-       in clip space */
-        Matrix.multiplyMV(
-                outPoint, 0,
-                invertedMatrix, 0,
-                normalizedInPoint, 0);
-
-        if (outPoint[3] == 0.0)
-        {
-            // Avoid /0 error.
-            Log.e("World coords", "ERROR!");
-            return worldPos;
-        }
-
-        // Divide by the 3rd component to find
-        // out the real position.
-        worldPos = new float[]{outPoint[0] / outPoint[3], outPoint[1] / outPoint[3]};
-
-        return worldPos;
-    }
 
 
 
