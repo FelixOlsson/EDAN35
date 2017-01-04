@@ -76,7 +76,7 @@ void main()
                      4.0 / 256.0, 16.0 / 256.0, 24.0 / 256.0, 16.0 / 256.0, 4.0 / 256.0,
                      1.0 / 256.0, 4.0 / 256.0,  6.0 / 256.0,  4.0 / 256.0,  1.0 / 256.0
                  );
-
+        // Don´t ask me why i needed to do two loops, it just would not work otherwise
         vec3 sampleTex[25];
         for(int i = 0; i < 17; i++)
         {

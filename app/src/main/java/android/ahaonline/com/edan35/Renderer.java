@@ -23,6 +23,7 @@ import static android.opengl.GLES30.*;
 import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.Vibrator;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -352,7 +353,9 @@ public class Renderer implements GLSurfaceView.Renderer {
     }
 
     public void handleTouchPress(float normalizedX, float normalizedY) {
-
+        Vibrator v = (Vibrator) this.context.getSystemService(Context.VIBRATOR_SERVICE);
+        // Vibrate for 500 milliseconds
+        v.vibrate(500);
     }
 
     private void drawFire() {

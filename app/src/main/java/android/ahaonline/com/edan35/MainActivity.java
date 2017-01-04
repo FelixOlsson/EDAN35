@@ -1,7 +1,9 @@
 package android.ahaonline.com.edan35;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -30,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         RelativeLayout r = (RelativeLayout) findViewById(R.id.activity_main);
         mGLView = new GLSurfaceView(this);
-        mGLView.setEGLContextClientVersion(2);
+        mGLView.setEGLContextClientVersion(3);
         mGLView.setRenderer(mRenderer);
         r.addView(mGLView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                     if(event.getAction() == MotionEvent.ACTION_DOWN) {
+
+
                         mGLView.queueEvent(new Runnable() {
                             @Override
                             public void run() {
