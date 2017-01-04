@@ -45,8 +45,6 @@ import static android.opengl.Matrix.translateM;
  */
 
 
-
-
 public class Renderer implements GLSurfaceView.Renderer {
 
 
@@ -148,10 +146,12 @@ public class Renderer implements GLSurfaceView.Renderer {
         spaceship = new Model();
         spaceship.loadModel(context, R.raw.spaceship1);
         spaceship.translate(0,0,0);
-        spaceship.rotateX(-90f);
         //spaceship.scale(2f);
         spaceship.transformMatrix();
         skybox = new SkyBox();
+
+        setIdentityM(modelMatrixForFire, 0);
+        translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.4f, -1);
 
         //Textures
         textureShaderProgram = new TextureShaderProgram(context);
@@ -180,8 +180,8 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         Matrix.setLookAtM(camera.getViewMatrix(), 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
-        Matrix.setIdentityM(modelMatrixForFire, 0);
-        translateM(modelMatrixForFire, 0, 0, -4.5f ,0);
+
+
     }
 
     @Override
@@ -245,29 +245,22 @@ public class Renderer implements GLSurfaceView.Renderer {
     private void postProcessingEffect(int width, int height) {
         glGenFramebuffers(frameBuffer.length, frameBuffer, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer[0]);
-
         glGenTextures(2, texColorBuffer, 0);
 
         for(int i = 0; i < 2; i++) {
-
             glBindTexture(GL_TEXTURE_2D, texColorBuffer[i]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texColorBuffer[i], 0);
         }
-
-
 
         glGenRenderbuffers(1, rbo, 0);
         glBindRenderbuffer(GL_RENDERBUFFER, rbo[0]);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo[0]);
-
-
         int[] attachments = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
         glDrawBuffers(2, attachments, 0);
 

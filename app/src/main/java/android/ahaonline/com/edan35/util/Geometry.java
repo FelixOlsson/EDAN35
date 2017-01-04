@@ -78,8 +78,6 @@ public class Geometry {
                 to.z - from.z);
     }
 
-
-
     public static Point intersectionPoint(Ray ray, Plane plane) {
         Vector rayToPlaneVector = vectorBetween(ray.point, plane.point);
 
