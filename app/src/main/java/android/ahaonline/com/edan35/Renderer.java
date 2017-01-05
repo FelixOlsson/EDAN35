@@ -48,6 +48,8 @@ import static android.opengl.Matrix.translateM;
 
 public class Renderer implements GLSurfaceView.Renderer {
 
+    Point touchedPoint;
+    Point startPoint;
 
     private Context context;
     private Camera camera;
@@ -85,6 +87,8 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final int[] texColorBuffer = new int[2];
     private final int[] rbo = new int[1];
     private long globalStartTime;
+
+    private float currentStep;
 
     private ParticleShaderProgram particleProgram;
     private ParticleSystem particleSystem;
@@ -147,6 +151,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         spaceship = new Model();
         spaceship.loadModel(context, R.raw.spaceship1);
         spaceship.translate(0,0,0);
+        touchedPoint = new Point(0,0,0);
+        startPoint = new Point(0,0,0);
         //spaceship.scale(2f);
         spaceship.transformMatrix();
         skybox = new SkyBox();
@@ -172,7 +178,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         light = new Light();
         screenOverlay = new ScreenOverlay();
         skyboxTexture = TextureHelper.loadCubeMap(context,
-                new int[] {  R.drawable.spacert, R.drawable.spacelf,
+                new int[] {  R.drawable.spacelf, R.drawable.spacert,
                         R.drawable.spaceup, R.drawable.spacedn,
                         R.drawable.spacebk, R.drawable.spaceft});
 
@@ -205,6 +211,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
+        ControlSpaceship();
 
         multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, light.getModelMatrix(), 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
@@ -274,7 +281,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         for(Model asteroid: asteroids) {
             asteroid.rotateX(0.5f);
-            asteroid.translate(0 , 0, - 0.01f);
+            asteroid.translate(0 , 0, - 0.05f);
 
             asteroid.transformMatrix();
             multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, asteroid.getModelMatrix(), 0);
@@ -337,25 +344,44 @@ public class Renderer implements GLSurfaceView.Renderer {
         return rand.nextFloat() * (max - min) + min;
     }
 
+    private Point oldPoint = new Point(0,0,0);
+
 
     public void handleTouchDrag(float normalizedX, float normalizedY) {
         Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
-
         Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, -1));
-
-        Point touchedPoint = Geometry.intersectionPoint(ray, plane);
-        spaceship.setIdentitiy();
-        spaceship.translate(touchedPoint.x, touchedPoint.y, 0);
-        spaceship.transformMatrix();
-        setIdentityM(modelMatrixForFire, 0);
-        translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.4f, -1);
+        touchedPoint = Geometry.intersectionPoint(ray, plane);
+        if(oldPoint.x != touchedPoint.x && oldPoint.y != touchedPoint.y) {
+            startPoint = new Point(spaceship.getX(), spaceship.getY(), 0);
+            currentStep = 0f;
+        }
+        oldPoint = touchedPoint;
 
     }
 
+    public void ControlSpaceship() {
+        if(Math.round(spaceship.getX()) != Math.round(touchedPoint.x) && Math.round(spaceship.getY()) != Math.round(touchedPoint.y)) {
+            Point distance = interpolation(startPoint, touchedPoint, currentStep++, 100f);
+            spaceship.setIdentitiy();
+            spaceship.translate(distance.x, distance.y, 0);
+            spaceship.transformMatrix();
+            setIdentityM(modelMatrixForFire, 0);
+            translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.4f, -1);
+        }
+    }
+
+    public Point interpolation(Point location, Point destination, float currentStep, float steps) {
+        return new Point(location.x + currentStep * (destination.x - location.x) / steps,
+                location.y + currentStep * (destination.y - location.y) / steps, 0);
+    }
+
     public void handleTouchPress(float normalizedX, float normalizedY) {
-        Vibrator v = (Vibrator) this.context.getSystemService(Context.VIBRATOR_SERVICE);
-        // Vibrate for 500 milliseconds
-        v.vibrate(500);
+        if(((normalizedX - startPoint.x) * (normalizedX - startPoint.x) +
+                (normalizedY - startPoint.y) * (normalizedY - startPoint.y)) < 10.0f) {
+            Vibrator v = (Vibrator) this.context.getSystemService(Context.VIBRATOR_SERVICE);
+            // Vibrate for 500 milliseconds
+            v.vibrate(500);
+        }
     }
 
     private void drawFire() {
