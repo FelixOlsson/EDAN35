@@ -1,15 +1,17 @@
 package android.ahaonline.com.edan35;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,8 +29,13 @@ public class MainActivity extends AppCompatActivity {
         loading_dialog.setContentView(R.layout.loader);
         loading_dialog.show();
 
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.custom_toast,
+                (ViewGroup) findViewById(R.id.custom_toast_container));
 
-        final Renderer mRenderer = new Renderer(this, loading_dialog);
+        Toast toast = new Toast(getApplicationContext());
+
+        final Renderer mRenderer = new Renderer(this, loading_dialog, toast, layout );
         setContentView(R.layout.activity_main);
         RelativeLayout r = (RelativeLayout) findViewById(R.id.activity_main);
         mGLView = new GLSurfaceView(this);
@@ -77,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-
 
 
     }

@@ -25,6 +25,10 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -103,9 +107,14 @@ public class Renderer implements GLSurfaceView.Renderer {
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrameTime = 0.0f;
 
-    public Renderer(Context context, Dialog loadScreen) {
+    private Toast toast;
+    private View layout;
+
+    public Renderer(Context context, Dialog loadScreen, Toast toast, View layout ) {
         this.context = context;
         this.loadScreen = loadScreen;
+        this.toast = toast;
+        this.layout = layout;
     }
 
     @Override
@@ -127,7 +136,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             asteroid.scale(randomNumber(1.0f,5.0f));
             float x = randomNumber(-25.0f,25.0f);
             float y = randomNumber(-25.0f,25.0f);
-            float z = randomNumber(-25.0f,25.0f);
+            float z = randomNumber(10.0f, 25.0f);
             asteroid.translate(x,y,z);
             asteroid.transformMatrix();
             asteroids.add(asteroid);
@@ -142,7 +151,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             light.scale(randomNumber(1.0f,5.0f));
             float x = randomNumber(-10.0f,10.0f);
             float y = randomNumber(-10.0f,10.0f);
-            float z = randomNumber(-10.0f,10.0f);
+            float z = randomNumber(10.0f,15.0f);
             light.translate(x,y,z);
             light.transformMatrix();
             lights.add(light);
@@ -186,8 +195,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         loadScreen.dismiss();
 
         Matrix.setLookAtM(camera.getViewMatrix(), 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
-
 
     }
 
@@ -360,7 +367,9 @@ public class Renderer implements GLSurfaceView.Renderer {
     }
 
     public void ControlSpaceship() {
-        if(Math.round(spaceship.getX()) != Math.round(touchedPoint.x) && Math.round(spaceship.getY()) != Math.round(touchedPoint.y)) {
+
+        if(Math.round(spaceship.getX() * 100.0) / 100.0 != Math.round(touchedPoint.x * 100.0) / 100.0
+                && Math.round(spaceship.getY() * 100.0) / 100.0 != Math.round(touchedPoint.y * 100.0) / 100.0) {
             Point distance = interpolation(startPoint, touchedPoint, currentStep++, 100f);
             spaceship.setIdentitiy();
             spaceship.translate(distance.x, distance.y, 0);
@@ -376,12 +385,34 @@ public class Renderer implements GLSurfaceView.Renderer {
     }
 
     public void handleTouchPress(float normalizedX, float normalizedY) {
-        if(((normalizedX - startPoint.x) * (normalizedX - startPoint.x) +
-                (normalizedY - startPoint.y) * (normalizedY - startPoint.y)) < 10.0f) {
-            Vibrator v = (Vibrator) this.context.getSystemService(Context.VIBRATOR_SERVICE);
-            // Vibrate for 500 milliseconds
-            v.vibrate(500);
+
+        Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
+        Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, -1));
+        Point p;
+        p = Geometry.intersectionPoint(ray, plane);
+
+        if(((p.x - spaceship.getX()) * (p.x - spaceship.getX()) +
+                (p.y - spaceship.getY()) * (p.y - spaceship.getY())) < 9.0f) {
+
+            toast.setGravity(Gravity.TOP, 0, 0);
+            toast.setDuration(Toast.LENGTH_LONG);
+            toast.setView(layout);
+
+            if (toast == null || toast.getView().getWindowVisibility() != View.VISIBLE) {
+                TextView text = (TextView) layout.findViewById(R.id.text);
+                text.setText(getEmojiByUnicode(0x2764) + getEmojiByUnicode(0x2764) + getEmojiByUnicode(0x2764));
+
+                toast.show();
+
+                Vibrator v = (Vibrator) this.context.getSystemService(Context.VIBRATOR_SERVICE);
+                // Vibrate for 500 milliseconds
+                v.vibrate(500);
+            }
         }
+    }
+
+    public String getEmojiByUnicode(int unicode){
+        return new String(Character.toChars(unicode));
     }
 
     private void drawFire() {
