@@ -87,4 +87,10 @@ public class Geometry {
         Point intersectionPoint = ray.point.translate(ray.vector.scale(scaleFactor));
         return intersectionPoint;
     }
+
+    public static boolean intersectionPointSphere(float x, float y, float spX, float spY, float treshhold) {
+        return ((x - spX) * (x - spX) +
+                (y - spY) * (y - spY) < treshhold);
+
+    }
 }

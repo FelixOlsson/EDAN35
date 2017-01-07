@@ -286,9 +286,17 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private void drawAsteroids() {
 
-        for(Model asteroid: asteroids) {
-            asteroid.rotateX(0.5f);
-            asteroid.translate(0 , 0, - 0.05f);
+        for(Model asteroid : asteroids) {
+            if(asteroid.getZ() < -28.0f) {
+                float x = randomNumber(-25.0f,25.0f);
+                float y = randomNumber(-25.0f,25.0f);
+                float z = randomNumber(10.0f, 25.0f);
+                asteroid.setIdentitiy();
+                asteroid.translate(x,y,z);
+                asteroid.transformMatrix();
+            }
+            asteroid.translate(0 , 0, - 0.07f);
+            asteroid.transformMatrix();
 
             asteroid.transformMatrix();
             multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, asteroid.getModelMatrix(), 0);
@@ -311,8 +319,8 @@ public class Renderer implements GLSurfaceView.Renderer {
     private void drawLights() {
 
         for(Model light : lights) {
-            light.rotateY(0.5f);
-            light.translate(0 , 0, - 0.01f);
+            //light.rotateY(0.5f);
+            light.translate(0 , 0, - 0.07f);
 
             light.transformMatrix();
             multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, light.getModelMatrix(), 0);
@@ -391,8 +399,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         Point p;
         p = Geometry.intersectionPoint(ray, plane);
 
-        if(((p.x - spaceship.getX()) * (p.x - spaceship.getX()) +
-                (p.y - spaceship.getY()) * (p.y - spaceship.getY())) < 9.0f) {
+        if(Geometry.intersectionPointSphere(p.x,p.y,spaceship.getX(),spaceship.getY(), 9.0f)) {
 
             toast.setGravity(Gravity.TOP, 0, 0);
             toast.setDuration(Toast.LENGTH_LONG);
