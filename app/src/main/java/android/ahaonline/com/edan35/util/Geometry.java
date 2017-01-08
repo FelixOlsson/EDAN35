@@ -78,7 +78,7 @@ public class Geometry {
                 to.z - from.z);
     }
 
-    public static Point intersectionPoint(Ray ray, Plane plane) {
+    public static Point intersectionRayPlane(Ray ray, Plane plane) {
         Vector rayToPlaneVector = vectorBetween(ray.point, plane.point);
 
         float scaleFactor = rayToPlaneVector.dotProduct(plane.normal)
@@ -88,9 +88,9 @@ public class Geometry {
         return intersectionPoint;
     }
 
-    public static boolean intersectionPointSphere(float x, float y, float spX, float spY, float treshhold) {
+    public static boolean intersectionPointSphere(float x, float y, float spX, float spY, float treshold) {
         return ((x - spX) * (x - spX) +
-                (y - spY) * (y - spY) < treshhold);
+                (y - spY) * (y - spY) < treshold);
 
     }
 }

@@ -15,6 +15,7 @@ public class transformController {
     private float rotationX, rotationY, rotationZ;
     private final float[] modelMatrix = new float[16];
     private float vel, rot;
+    private float size = 1;
 
     //temporary values
     private float tX = 0, tY = 0, tZ = 0;
@@ -69,15 +70,15 @@ public class transformController {
     }
 
     public float getX() {
-        return modelMatrix[12];
+        return x;
     }
 
     public float getY() {
-        return modelMatrix[13];
+        return y;
     }
 
     public float getZ() {
-        return modelMatrix[14];
+        return z;
     }
 
     public float[] getModelMatrix() {
@@ -90,6 +91,10 @@ public class transformController {
         rotateM(modelMatrix, 0, tRotationY, 0f, 1f, 0f);
         rotateM(modelMatrix, 0, tRotationZ, 0f, 0f, 1f);
         translateM(modelMatrix, 0, tX, tY, tZ);
+        x = modelMatrix[12];
+        y = modelMatrix[13];
+        z = modelMatrix[14];
+        size = tSizeX;
 
         resetValues();
     }
@@ -126,6 +131,16 @@ public class transformController {
 
     public void setIdentitiy() {
         setIdentityM(modelMatrix, 0);
+    }
+
+    public void setCoordinates() {
+        x = modelMatrix[12];
+        y = modelMatrix[13];
+        z = modelMatrix[14];
+    }
+
+    public float getSize() {
+        return size;
     }
 
 

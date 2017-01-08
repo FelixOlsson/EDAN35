@@ -17,6 +17,7 @@ import android.ahaonline.com.edan35.util.TextureHelper;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.app.Dialog;
 import android.content.Context;
+
 import static android.ahaonline.com.edan35.util.Geometry.*;
 
 import static android.opengl.GLES30.*;
@@ -24,7 +25,6 @@ import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
@@ -70,6 +70,8 @@ public class Renderer implements GLSurfaceView.Renderer {
     private SkyBoxShaderProgram skyboxProgram;
     private SkyBox skybox;
     private int skyboxTexture;
+    private int life = 3;
+
 
 
     private int texture, texture2, texture3;
@@ -96,10 +98,14 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private ParticleShaderProgram particleProgram;
     private ParticleSystem particleSystem;
-    private ParticleShooter redParticleShooter;
+    private ParticleShooter engine;
+    private ParticleSystem particleSystem2;
+    private ParticleShooter explosion;
+    private ArrayList<ParticleSystem> e;
 
     private boolean spaceshipPressed = false;
     private ArrayList<List> ar;
+    private ArrayList<Model> laserShots = new ArrayList<>();
 
     private int height;
     private int width;
@@ -127,13 +133,30 @@ public class Renderer implements GLSurfaceView.Renderer {
         particleProgram = new ParticleShaderProgram(context);
         particleSystem = new ParticleSystem(250);
         globalStartTime = System.nanoTime();
-        redParticleShooter = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees, speedVariance);
+        engine = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees, speedVariance);
+
+
+        particleSystem2 = new ParticleSystem(500);
+
+
 
         // Objects
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 15; i++) {
             Model asteroid = new Model();
             asteroid.loadModel(context, R.raw.asteroid1);
-            asteroid.scale(randomNumber(1.0f,5.0f));
+            asteroid.scale(randomNumber(0.5f,5.0f));
+            float x = randomNumber(-25.0f,25.0f);
+            float y = randomNumber(-25.0f,25.0f);
+            float z = randomNumber(10.0f, 25.0f);
+            asteroid.translate(x,y,z);
+            asteroid.transformMatrix();
+            asteroids.add(asteroid);
+        }
+
+        for(int i = 0; i < 15; i++) {
+            Model asteroid = new Model();
+            asteroid.loadModel(context, R.raw.asteroid2);
+            asteroid.scale(randomNumber(0.5f,5.0f));
             float x = randomNumber(-25.0f,25.0f);
             float y = randomNumber(-25.0f,25.0f);
             float z = randomNumber(10.0f, 25.0f);
@@ -157,6 +180,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             lights.add(light);
         }
 
+
         spaceship = new Model();
         spaceship.loadModel(context, R.raw.spaceship1);
         spaceship.translate(0,0,0);
@@ -166,8 +190,10 @@ public class Renderer implements GLSurfaceView.Renderer {
         spaceship.transformMatrix();
         skybox = new SkyBox();
 
+
+
         setIdentityM(modelMatrixForFire, 0);
-        translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.4f, -1);
+        translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.1f, -1);
 
         //Textures
         textureShaderProgram = new TextureShaderProgram(context);
@@ -179,7 +205,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         texture3 = TextureHelper.loadTexture(context, R.drawable.metal);
         texture = TextureHelper.loadTexture(context, R.drawable.seamlessstonetexture);
         texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
-        textureParticle = TextureHelper.loadTexture(context, R.drawable.particle_texture);
+        textureParticle = TextureHelper.loadTexture(context, R.drawable.fire);
 
 
         //Utility
@@ -217,6 +243,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
 
         ControlSpaceship();
 
@@ -233,7 +260,13 @@ public class Renderer implements GLSurfaceView.Renderer {
         drawSpaceship();
         drawLights();
         drawSkybox();
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glDisable(GL_DEPTH_TEST);
         drawFire();
+        drawExplosion(0,0,0);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_DEPTH_TEST);
+        drawLaser();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -244,6 +277,25 @@ public class Renderer implements GLSurfaceView.Renderer {
         screenOverlay.bindShader(frameShaderProgram);
         frameShaderProgram.setUniforms(texColorBuffer[0], texColorBuffer[1]);
         screenOverlay.draw();
+    }
+
+    private void drawLaser() {
+
+       for(Model laser : laserShots) {
+           setIdentityM(laser.getModelMatrix(), 0);
+           translateM(laser.getModelMatrix(), 0, laser.getX(), laser.getY(), laser.getZ() + 1.0f);
+           rotateM(laser.getModelMatrix(), 0, 90f, 0f, 1f, 0f);
+           multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, laser.getModelMatrix(), 0);
+           Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+           laser.lightVariables(new float[]{0, 0, 0.5f}
+                   , new float[]{1, 0, 0},
+                   new float[]{0, 0, 0}, 1.0f, 0.007f, 0.0002f);
+           shaderLightProgram.useProgram();
+           laser.bindShader(shaderLightProgram);
+           shaderLightProgram.setUniforms(modelViewProjectionMatrix, laser);
+           laser.draw();
+           laser.setCoordinates();
+       }
     }
 
     private void drawSkybox() {
@@ -284,16 +336,50 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     }
 
+    private void respawnAsteroid(Model asteroid) {
+        float x = randomNumber(-25.0f,25.0f);
+        float y = randomNumber(-25.0f,25.0f);
+        float z = randomNumber(50.0f, 75.0f);
+        asteroid.setIdentitiy();
+        asteroid.scale(randomNumber(0.1f, 10f));
+        asteroid.translate(x,y,z);
+        asteroid.transformMatrix();
+    }
+
     private void drawAsteroids() {
 
         for(Model asteroid : asteroids) {
+
             if(asteroid.getZ() < -28.0f) {
-                float x = randomNumber(-25.0f,25.0f);
-                float y = randomNumber(-25.0f,25.0f);
-                float z = randomNumber(10.0f, 25.0f);
-                asteroid.setIdentitiy();
-                asteroid.translate(x,y,z);
-                asteroid.transformMatrix();
+                respawnAsteroid(asteroid);
+            } else if(asteroid.getZ() < 5f && asteroid.getZ() > 0f){
+                if(Math.sqrt((asteroid.getX() - spaceship.getX()) * (asteroid.getX() - spaceship.getX()) +
+                        (asteroid.getY() - spaceship.getY()) * (asteroid.getY() - spaceship.getY()) +
+                        (asteroid.getZ() - spaceship.getZ()) * (asteroid.getZ() - spaceship.getZ()))< (5 * asteroid.getSize())) {
+
+                    drawExplosion(asteroid.getX(), asteroid.getY(), asteroid.getZ());
+                    respawnAsteroid(asteroid);
+                    System.out.println(asteroid.getX());
+                    System.out.println(asteroid.getY());
+                    System.out.println(asteroid.getZ());
+                    toast.setGravity(Gravity.TOP, 0, 0);
+                    toast.setDuration(Toast.LENGTH_LONG);
+                    toast.setView(layout);
+
+                    if (toast == null || toast.getView().getWindowVisibility() != View.VISIBLE) {
+                        TextView text = (TextView) layout.findViewById(R.id.text);
+                        String hearts = "";
+                        for(int i = 0; i < life; i++) {
+                            hearts += getEmojiByUnicode(0x2764);
+                        }
+                        text.setText(hearts);
+
+                        toast.show();
+                        Vibrator v = (Vibrator) this.context.getSystemService(Context.VIBRATOR_SERVICE);
+                        v.vibrate(500);
+                        life--;
+                    }
+                }
             }
             asteroid.translate(0 , 0, - 0.07f);
             asteroid.transformMatrix();
@@ -316,9 +402,50 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     }
 
+    private void drawExplosion(float x, float y, float z) {
+
+        final float angleVarianceInDegrees2 = 180f;
+        final float speedVariance2 = 5f;
+        explosion = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees2, speedVariance2);
+
+        float [] modelMatrixForExplosion = new float[16];
+
+        setIdentityM(modelMatrixForExplosion, 0);
+
+        translateM(modelMatrixForExplosion, 0, 0, 0, 0);
+
+        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrixForExplosion, 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
+                camera.getViewMatrix(), 0);
+
+        float currentTime = (System.nanoTime() - globalStartTime) / 1000000000f;
+        explosion.addParticles(particleSystem2, currentTime, 500);
+
+        particleProgram.useProgram();
+        particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
+        particleSystem2.bindData(particleProgram);
+        particleSystem2.draw();
+    }
+
     private void drawLights() {
 
         for(Model light : lights) {
+
+            if(light.getZ() < -28.0f) {
+                light.lightVariables(new float[]{randomNumber(0.3f,10.5f),randomNumber(0.3f,0.5f),randomNumber(0.3f,0.5f)}
+                        , new float[]{randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f)},
+                        new float[]{randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f),randomNumber(0.0f,1.0f)}, 1.0f, 0.007f, 0.0002f);
+
+                float x = randomNumber(-10.0f,10.0f);
+                float y = randomNumber(-10.0f,10.0f);
+                float z = randomNumber(50.0f,75.0f);
+                light.setIdentitiy();
+                light.scale(randomNumber(1.0f,5.0f));
+                light.translate(x,y,z);
+                light.transformMatrix();
+            }
+
             //light.rotateY(0.5f);
             light.translate(0 , 0, - 0.07f);
 
@@ -365,7 +492,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     public void handleTouchDrag(float normalizedX, float normalizedY) {
         Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
         Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, -1));
-        touchedPoint = Geometry.intersectionPoint(ray, plane);
+        touchedPoint = Geometry.intersectionRayPlane(ray, plane);
         if(oldPoint.x != touchedPoint.x && oldPoint.y != touchedPoint.y) {
             startPoint = new Point(spaceship.getX(), spaceship.getY(), 0);
             currentStep = 0f;
@@ -383,7 +510,8 @@ public class Renderer implements GLSurfaceView.Renderer {
             spaceship.translate(distance.x, distance.y, 0);
             spaceship.transformMatrix();
             setIdentityM(modelMatrixForFire, 0);
-            translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.4f, -1);
+            translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.1f, -1);
+
         }
     }
 
@@ -397,34 +525,29 @@ public class Renderer implements GLSurfaceView.Renderer {
         Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
         Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, -1));
         Point p;
-        p = Geometry.intersectionPoint(ray, plane);
+        p = Geometry.intersectionRayPlane(ray, plane);
 
         if(Geometry.intersectionPointSphere(p.x,p.y,spaceship.getX(),spaceship.getY(), 9.0f)) {
 
-            toast.setGravity(Gravity.TOP, 0, 0);
-            toast.setDuration(Toast.LENGTH_LONG);
-            toast.setView(layout);
-
-            if (toast == null || toast.getView().getWindowVisibility() != View.VISIBLE) {
-                TextView text = (TextView) layout.findViewById(R.id.text);
-                text.setText(getEmojiByUnicode(0x2764) + getEmojiByUnicode(0x2764) + getEmojiByUnicode(0x2764));
-
-                toast.show();
-
-                Vibrator v = (Vibrator) this.context.getSystemService(Context.VIBRATOR_SERVICE);
-                // Vibrate for 500 milliseconds
-                v.vibrate(500);
-            }
+                Model laser = new Model();
+                laser.loadModel(context, R.raw.laser);
+                laserShots.add(laser);
+                setIdentityM(laser.getModelMatrix(), 0);
+                translateM(laser.getModelMatrix(), 0, spaceship.getX(), spaceship.getY(), 10f);
+                rotateM(laser.getModelMatrix(), 0, 90f, 0f, 1f, 0f);
+                laser.setCoordinates();
+                drawExplosion(0,0,0);
         }
     }
+
+
 
     public String getEmojiByUnicode(int unicode){
         return new String(Character.toChars(unicode));
     }
 
     private void drawFire() {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
+        //glEnable(GL_BLEND);
 
         multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrixForFire, 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
@@ -432,14 +555,14 @@ public class Renderer implements GLSurfaceView.Renderer {
                 camera.getViewMatrix(), 0);
 
         float currentTime = (System.nanoTime() - globalStartTime) / 1000000000f;
-        redParticleShooter.addParticles(particleSystem, currentTime, 5);
+        engine.addParticles(particleSystem, currentTime, 10);
 
         particleProgram.useProgram();
         particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
         particleSystem.bindData(particleProgram);
         particleSystem.draw();
 
-        glDisable(GL_BLEND);
+        //glDisable(GL_BLEND);
     }
 
     private Ray convertNormalized2DPointToRay(

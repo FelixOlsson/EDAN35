@@ -37,6 +37,10 @@ public class ParticleShooter extends transformController{
         directionVector[0] = direction[0];
         directionVector[1] = direction[1];
         directionVector[2] = direction[2];
+
+        //directionVector[0] = random.nextInt(1);
+        //directionVector[1] = random.nextInt(1);
+       // directionVector[2] = random.nextInt(1);
     }
 
     public void addParticles(ParticleSystem particleSystem, float currentTime, int count) {
