@@ -62,7 +62,7 @@ public class TextureShaderProgram extends ShaderProgram {
 
        glUniformMatrix4fv(uMVPMatrixLocation, 1, false, mvpMatrix, 0);
         glUniformMatrix4fv(uMMatrixLocation, 1, false, mMatrix, 0);
-        glUniform3f(uViewPositionLocation, camera.getX(), camera.getY(), camera.getZ());
+        glUniform3f(uViewPositionLocation, 0, 0, -27.0f);
        glUniform1f(uShininessLocation, shininess);
 
         glActiveTexture(GL_TEXTURE0);

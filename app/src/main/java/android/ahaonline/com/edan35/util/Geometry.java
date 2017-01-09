@@ -1,5 +1,7 @@
 package android.ahaonline.com.edan35.util;
 
+import static android.R.attr.x;
+
 /**
  * Created by Felix on 2016-12-16.
  */
@@ -92,5 +94,10 @@ public class Geometry {
         return ((x - spX) * (x - spX) +
                 (y - spY) * (y - spY) < treshold);
 
+    }
+
+    public static float distancePointToPoint(Point from, Point to) {
+        return (float)Math.sqrt((to.x - from.x) * (to.x - from.x) +
+                (to.y - from.y) * (to.y - from.y) + (to.z - from.z) * (to.z - from.z));
     }
 }

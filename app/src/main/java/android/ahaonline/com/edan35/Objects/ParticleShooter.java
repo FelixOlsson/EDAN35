@@ -6,6 +6,8 @@ package android.ahaonline.com.edan35.Objects;
 
 
 
+import android.opengl.Matrix;
+
 import java.util.Random;
 import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.setRotateEulerM;
@@ -25,6 +27,8 @@ public class ParticleShooter extends transformController{
     private float[] rotationMatrix = new float[16];
     private float[] directionVector = new float[4];
     private float[] resultVector = new float[4];
+
+    private boolean once = true;
 
 
     public ParticleShooter(float[] position, float[] direction, int color, float angleVarianceInDegrees, float speedVariance) {
@@ -50,6 +54,7 @@ public class ParticleShooter extends transformController{
             setRotateEulerM(rotationMatrix, 0, (random.nextFloat() - 0.5f) * angleVariance,
                     (random.nextFloat() - 0.5f) * angleVariance, (random.nextFloat() - 0.5f) * angleVariance);
 
+
             multiplyMV(resultVector, 0, rotationMatrix, 0, directionVector, 0);
 
             float speedAdjustment = 1f + random.nextFloat() * speedVariance;
@@ -62,5 +67,14 @@ public class ParticleShooter extends transformController{
 
             particleSystem.addParticle(position, color, thisDirection, currentTime);
         }
+    }
+
+    public boolean once() {
+        if(once) {
+            once = false;
+            return true;
+        }
+
+        return false;
     }
 }

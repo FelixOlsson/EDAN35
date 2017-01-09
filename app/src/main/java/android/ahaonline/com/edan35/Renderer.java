@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -93,15 +94,17 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final int[] texColorBuffer = new int[2];
     private final int[] rbo = new int[1];
     private long globalStartTime;
+    private boolean ones = true;
 
     private float currentStep;
 
     private ParticleShaderProgram particleProgram;
     private ParticleSystem particleSystem;
     private ParticleShooter engine;
-    private ParticleSystem particleSystem2;
-    private ParticleShooter explosion;
-    private ArrayList<ParticleSystem> e;
+    private ParticleSystem particleSystemExplosions;
+    private ArrayList<ParticleShooter> explosions = new ArrayList<>();
+    private ArrayList<Point> explosionPoints = new ArrayList<>();
+    private ArrayList<Point> laserPoints = new ArrayList<>();
 
     private boolean spaceshipPressed = false;
     private ArrayList<List> ar;
@@ -135,8 +138,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         globalStartTime = System.nanoTime();
         engine = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees, speedVariance);
 
-
-        particleSystem2 = new ParticleSystem(500);
+        particleSystemExplosions = new ParticleSystem(500);
 
 
 
@@ -164,6 +166,8 @@ public class Renderer implements GLSurfaceView.Renderer {
             asteroid.transformMatrix();
             asteroids.add(asteroid);
         }
+
+
 
         for(int i = 0; i < 3; i++) {
             Model light = new Model();
@@ -221,6 +225,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         loadScreen.dismiss();
 
         Matrix.setLookAtM(camera.getViewMatrix(), 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+
 
     }
 
@@ -357,16 +363,18 @@ public class Renderer implements GLSurfaceView.Renderer {
                         (asteroid.getY() - spaceship.getY()) * (asteroid.getY() - spaceship.getY()) +
                         (asteroid.getZ() - spaceship.getZ()) * (asteroid.getZ() - spaceship.getZ()))< (5 * asteroid.getSize())) {
 
-                    drawExplosion(asteroid.getX(), asteroid.getY(), asteroid.getZ());
-                    respawnAsteroid(asteroid);
-                    System.out.println(asteroid.getX());
-                    System.out.println(asteroid.getY());
-                    System.out.println(asteroid.getZ());
+
+
                     toast.setGravity(Gravity.TOP, 0, 0);
                     toast.setDuration(Toast.LENGTH_LONG);
                     toast.setView(layout);
 
                     if (toast == null || toast.getView().getWindowVisibility() != View.VISIBLE) {
+                        float angleVarianceInDegrees2 = 180f;
+                        float speedVariance2 = randomNumber(5.0f, 15.0f);
+                        explosions.add(new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees2, speedVariance2));
+                        explosionPoints.add(new Point(asteroid.getX(), asteroid.getY(), asteroid.getZ()));
+                        respawnAsteroid(asteroid);
                         TextView text = (TextView) layout.findViewById(R.id.text);
                         String hearts = "";
                         for(int i = 0; i < life; i++) {
@@ -403,29 +411,40 @@ public class Renderer implements GLSurfaceView.Renderer {
     }
 
     private void drawExplosion(float x, float y, float z) {
+        Iterator<ParticleShooter> explosion = explosions.iterator();
+        Iterator<Point> points = explosionPoints.iterator();
 
-        final float angleVarianceInDegrees2 = 180f;
-        final float speedVariance2 = 5f;
-        explosion = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees2, speedVariance2);
+        while(explosion.hasNext() && points.hasNext()) {
 
-        float [] modelMatrixForExplosion = new float[16];
+            float currentTime = (System.nanoTime() - globalStartTime) / 1000000000f;
+            ParticleShooter tempExplosion = explosion.next();
+            Point tempPoint = points.next();
+            if( tempPoint != null) {
+                float [] modelMatrixForExplosion = new float[16];
 
-        setIdentityM(modelMatrixForExplosion, 0);
+                setIdentityM(modelMatrixForExplosion, 0);
+                translateM(modelMatrixForExplosion, 0, tempPoint.x, tempPoint.y, tempPoint.z);
 
-        translateM(modelMatrixForExplosion, 0, 0, 0, 0);
+                multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrixForExplosion, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
+                        camera.getViewMatrix(), 0);
 
-        multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrixForExplosion, 0);
-        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
-                camera.getViewMatrix(), 0);
+                if(tempExplosion.once()) {
+                    tempExplosion.addParticles(particleSystemExplosions, currentTime, 500);
+                }
 
-        float currentTime = (System.nanoTime() - globalStartTime) / 1000000000f;
-        explosion.addParticles(particleSystem2, currentTime, 500);
 
-        particleProgram.useProgram();
-        particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
-        particleSystem2.bindData(particleProgram);
-        particleSystem2.draw();
+                particleProgram.useProgram();
+                particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
+                particleSystemExplosions.bindData(particleProgram);
+                particleSystemExplosions.draw();
+                tempExplosion.addParticles(particleSystemExplosions, currentTime, 0);
+            }
+
+
+        }
+
     }
 
     private void drawLights() {
@@ -548,7 +567,6 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private void drawFire() {
         //glEnable(GL_BLEND);
-
         multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrixForFire, 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
