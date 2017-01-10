@@ -1,6 +1,5 @@
 package android.ahaonline.com.edan35.util;
 
-import static android.R.attr.x;
 
 /**
  * Created by Felix on 2016-12-16.
@@ -74,10 +73,7 @@ public class Geometry {
     }
 
     public static Vector vectorBetween(Point from, Point to) {
-        return new Vector(
-                to.x - from.x,
-                to.y - from.y,
-                to.z - from.z);
+        return new Vector(to.x - from.x, to.y - from.y, to.z - from.z);
     }
 
     public static Point intersectionRayPlane(Ray ray, Plane plane) {
@@ -90,9 +86,9 @@ public class Geometry {
         return intersectionPoint;
     }
 
-    public static boolean intersectionPointSphere(float x, float y, float spX, float spY, float treshold) {
+    public static boolean intersectionPointSphere(float x, float y, float spX, float spY, float threshold) {
         return ((x - spX) * (x - spX) +
-                (y - spY) * (y - spY) < treshold);
+                (y - spY) * (y - spY) < threshold);
 
     }
 

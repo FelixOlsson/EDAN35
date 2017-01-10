@@ -53,8 +53,8 @@ import static android.opengl.Matrix.translateM;
 
 public class Renderer implements GLSurfaceView.Renderer {
 
-    Point touchedPoint;
-    Point startPoint;
+    private Point touchedPoint;
+    private Point startPoint;
 
     private Context context;
     private Camera camera;
@@ -72,8 +72,6 @@ public class Renderer implements GLSurfaceView.Renderer {
     private SkyBox skybox;
     private int skyboxTexture;
     private int life = 3;
-
-
 
     private int texture, texture2, texture3;
     private int textureParticle;
@@ -94,7 +92,6 @@ public class Renderer implements GLSurfaceView.Renderer {
     private final int[] texColorBuffer = new int[2];
     private final int[] rbo = new int[1];
     private long globalStartTime;
-    private boolean ones = true;
 
     private float currentStep;
 
@@ -106,15 +103,12 @@ public class Renderer implements GLSurfaceView.Renderer {
     private ArrayList<Point> explosionPoints = new ArrayList<>();
     private ArrayList<Point> laserPoints = new ArrayList<>();
 
-    private boolean spaceshipPressed = false;
     private ArrayList<List> ar;
     private ArrayList<Model> laserShots = new ArrayList<>();
 
     private int height;
     private int width;
 
-    float deltaTime = 0.0f;	// Time between current frame and last frame
-    float lastFrameTime = 0.0f;
 
     private Toast toast;
     private View layout;
@@ -129,7 +123,6 @@ public class Renderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
 
         final float angleVarianceInDegrees = 25f;
         final float speedVariance = 5f;
@@ -167,8 +160,6 @@ public class Renderer implements GLSurfaceView.Renderer {
             asteroids.add(asteroid);
         }
 
-
-
         for(int i = 0; i < 3; i++) {
             Model light = new Model();
             light.loadModel(context, R.raw.light);
@@ -190,11 +181,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         spaceship.translate(0,0,0);
         touchedPoint = new Point(0,0,0);
         startPoint = new Point(0,0,0);
-        //spaceship.scale(2f);
         spaceship.transformMatrix();
         skybox = new SkyBox();
-
-
 
         setIdentityM(modelMatrixForFire, 0);
         translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.1f, -1);
@@ -225,8 +213,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         loadScreen.dismiss();
 
         Matrix.setLookAtM(camera.getViewMatrix(), 0, 0, 0, -27, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
-
 
     }
 
@@ -269,7 +255,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDisable(GL_DEPTH_TEST);
         drawFire();
-        drawExplosion(0,0,0);
+        drawExplosion();
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
         drawLaser();
@@ -363,23 +349,19 @@ public class Renderer implements GLSurfaceView.Renderer {
                         (asteroid.getY() - spaceship.getY()) * (asteroid.getY() - spaceship.getY()) +
                         (asteroid.getZ() - spaceship.getZ()) * (asteroid.getZ() - spaceship.getZ()))< (5 * asteroid.getSize())) {
 
-
-
                     toast.setGravity(Gravity.TOP, 0, 0);
                     toast.setDuration(Toast.LENGTH_LONG);
                     toast.setView(layout);
 
                     if (toast == null || toast.getView().getWindowVisibility() != View.VISIBLE) {
-                        float angleVarianceInDegrees2 = 180f;
-                        float speedVariance2 = randomNumber(5.0f, 15.0f);
-                        explosions.add(new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees2, speedVariance2));
-                        explosionPoints.add(new Point(asteroid.getX(), asteroid.getY(), asteroid.getZ()));
-                        respawnAsteroid(asteroid);
+
                         TextView text = (TextView) layout.findViewById(R.id.text);
                         String hearts = "";
+
                         for(int i = 0; i < life; i++) {
                             hearts += getEmojiByUnicode(0x2764);
                         }
+
                         text.setText(hearts);
 
                         toast.show();
@@ -389,6 +371,25 @@ public class Renderer implements GLSurfaceView.Renderer {
                     }
                 }
             }
+
+            for(Model laser : laserShots) {
+                Vector laserDir = new Vector(1,0,0);
+                Point laserPoint = new Point(laser.getX(), laser.getY(), laser.getZ());
+                Point asteroidPoint = new Point(asteroid.getX(), asteroid.getY(), asteroid.getZ());
+                Vector between = Geometry.vectorBetween(laserPoint, asteroidPoint);
+
+                if(laserDir.dotProduct(between) > 0 && Geometry.distancePointToPoint(laserPoint, asteroidPoint) < 9){
+                    explosions = new ArrayList<>();
+                    explosionPoints = new ArrayList<>();
+                    float angleVarianceInDegrees2 = 180f;
+                    float speedVariance2 = randomNumber(15.0f, 25.0f);
+                    explosions.add(new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees2, speedVariance2));
+                    explosionPoints.add(new Point(asteroid.getX(), asteroid.getY(), asteroid.getZ()));
+                    respawnAsteroid(asteroid);
+                }
+
+            }
+
             asteroid.translate(0 , 0, - 0.07f);
             asteroid.transformMatrix();
 
@@ -410,7 +411,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     }
 
-    private void drawExplosion(float x, float y, float z) {
+    private void drawExplosion() {
         Iterator<ParticleShooter> explosion = explosions.iterator();
         Iterator<Point> points = explosionPoints.iterator();
 
@@ -439,10 +440,8 @@ public class Renderer implements GLSurfaceView.Renderer {
                 particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
                 particleSystemExplosions.bindData(particleProgram);
                 particleSystemExplosions.draw();
-                tempExplosion.addParticles(particleSystemExplosions, currentTime, 0);
+
             }
-
-
         }
 
     }
@@ -465,7 +464,6 @@ public class Renderer implements GLSurfaceView.Renderer {
                 light.transformMatrix();
             }
 
-            //light.rotateY(0.5f);
             light.translate(0 , 0, - 0.07f);
 
             light.transformMatrix();
@@ -480,7 +478,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     }
 
-    public void drawSpaceship() {
+    private void drawSpaceship() {
 
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix,
                 0, spaceship.getModelMatrix(), 0);
@@ -494,7 +492,6 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         invertM(inversedViewMatrix, 0, modelViewMatrix, 0);
         Matrix.transposeM(normalViewMatrix, 0, inversedViewMatrix, 0);
-        float[] color = new float[] {0.329412f, 0.329412f, 0.329412f};
 
         shaderTestProgram.setUniforms(modelViewProjectionMatrix, texture3);
         spaceship.draw();
@@ -509,7 +506,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
 
     public void handleTouchDrag(float normalizedX, float normalizedY) {
-        Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
+        Ray ray = convertPointToRayCoveringFrustum(normalizedX, normalizedY);
         Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, -1));
         touchedPoint = Geometry.intersectionRayPlane(ray, plane);
         if(oldPoint.x != touchedPoint.x && oldPoint.y != touchedPoint.y) {
@@ -520,7 +517,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     }
 
-    public void ControlSpaceship() {
+    private void ControlSpaceship() {
 
         if(Math.round(spaceship.getX() * 100.0) / 100.0 != Math.round(touchedPoint.x * 100.0) / 100.0
                 && Math.round(spaceship.getY() * 100.0) / 100.0 != Math.round(touchedPoint.y * 100.0) / 100.0) {
@@ -534,20 +531,19 @@ public class Renderer implements GLSurfaceView.Renderer {
         }
     }
 
-    public Point interpolation(Point location, Point destination, float currentStep, float steps) {
+    private Point interpolation(Point location, Point destination, float currentStep, float steps) {
         return new Point(location.x + currentStep * (destination.x - location.x) / steps,
                 location.y + currentStep * (destination.y - location.y) / steps, 0);
     }
 
     public void handleTouchPress(float normalizedX, float normalizedY) {
 
-        Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
+        Ray ray = convertPointToRayCoveringFrustum(normalizedX, normalizedY);
         Plane plane = new Plane(new Point(0, 0, 0), new Vector(0, 0, -1));
         Point p;
         p = Geometry.intersectionRayPlane(ray, plane);
 
         if(Geometry.intersectionPointSphere(p.x,p.y,spaceship.getX(),spaceship.getY(), 9.0f)) {
-
                 Model laser = new Model();
                 laser.loadModel(context, R.raw.laser);
                 laserShots.add(laser);
@@ -555,18 +551,16 @@ public class Renderer implements GLSurfaceView.Renderer {
                 translateM(laser.getModelMatrix(), 0, spaceship.getX(), spaceship.getY(), 10f);
                 rotateM(laser.getModelMatrix(), 0, 90f, 0f, 1f, 0f);
                 laser.setCoordinates();
-                drawExplosion(0,0,0);
         }
     }
 
 
 
-    public String getEmojiByUnicode(int unicode){
+    private String getEmojiByUnicode(int unicode){
         return new String(Character.toChars(unicode));
     }
 
     private void drawFire() {
-        //glEnable(GL_BLEND);
         multiplyMM(modelViewMatrix, 0, camera.getViewMatrix(), 0, modelMatrixForFire, 0);
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
@@ -579,29 +573,23 @@ public class Renderer implements GLSurfaceView.Renderer {
         particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
         particleSystem.bindData(particleProgram);
         particleSystem.draw();
-
-        //glDisable(GL_BLEND);
     }
 
-    private Ray convertNormalized2DPointToRay(
-            float normalizedX, float normalizedY) {
+    private Ray convertPointToRayCoveringFrustum(float normalizedX, float normalizedY) {
 
         final float[] nearPointNdc = {normalizedX, normalizedY, -1, 1};
         final float[] farPointNdc =  {normalizedX, normalizedY,  1, 1};
 
-        final float[] nearPointWorld = new float[4];
-        final float[] farPointWorld = new float[4];
+        final float[] nearPointFrustum = new float[4];
+        final float[] farPointFrustum = new float[4];
 
-        multiplyMV(nearPointWorld, 0, invertedViewProjectionMatrix, 0, nearPointNdc, 0);
-        multiplyMV(farPointWorld, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
+        multiplyMV(nearPointFrustum, 0, invertedViewProjectionMatrix, 0, nearPointNdc, 0);
+        multiplyMV(farPointFrustum, 0, invertedViewProjectionMatrix, 0, farPointNdc, 0);
 
+        Point nearPointRay = new Point(nearPointFrustum[0]/nearPointFrustum[3], nearPointFrustum[1]/nearPointFrustum[3], nearPointFrustum[2]/nearPointFrustum[3]);
+        Point farPointRay = new Point(farPointFrustum[0]/farPointFrustum[3], farPointFrustum[1]/farPointFrustum[3], farPointFrustum[2]/farPointFrustum[3]);
 
-        Point nearPointRay = new Point(nearPointWorld[0]/nearPointWorld[3], nearPointWorld[1]/nearPointWorld[3], nearPointWorld[2]/nearPointWorld[3]);
-
-        Point farPointRay = new Point(farPointWorld[0]/farPointWorld[3], farPointWorld[1]/farPointWorld[3], farPointWorld[2]/farPointWorld[3]);
-
-        return new Ray(nearPointRay,
-                Geometry.vectorBetween(nearPointRay, farPointRay));
+        return new Ray(nearPointRay, Geometry.vectorBetween(nearPointRay, farPointRay));
     }
 
 
