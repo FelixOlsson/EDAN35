@@ -44,7 +44,7 @@ public class ParticleSystem  extends transformController{
         this.maxParticleCount = maxParticleCount;
     }
 
-    public void addParticle(float[] position, int color, float[] direction, float particleStartTime) {
+    public void addParticle(float[] position, float[] color, float[] direction, float particleStartTime) {
 
         final int posNumber = nextParticle * 3;
         final int colNumber = nextParticle * 3;
@@ -68,9 +68,9 @@ public class ParticleSystem  extends transformController{
         vert[posOffset++] = position[1];
         vert[posOffset++] = position[2];
 
-        col[colOffset++] = Color.red(color) / 255f;
-        col[colOffset++] = Color.green(color) / 255f;
-        col[colOffset++] = Color.blue(color) / 255f;
+        col[colOffset++] = color[0] / 255f;
+        col[colOffset++] = color[1] / 255f;
+        col[colOffset++] = color[2] / 255f;
 
         vect[vecOffset++] = direction[0];
         vect[vecOffset++] = direction[1];

@@ -6,8 +6,6 @@ package android.ahaonline.com.edan35.Objects;
 
 
 
-import android.opengl.Matrix;
-
 import java.util.Random;
 import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.setRotateEulerM;
@@ -17,7 +15,7 @@ import static android.opengl.Matrix.setRotateEulerM;
 public class ParticleShooter extends transformController{
     private final float[] position;
     private final float[] direction;
-    private final int color;
+    private final float[] color;
 
     private final float angleVariance;
     private final float speedVariance;
@@ -25,26 +23,26 @@ public class ParticleShooter extends transformController{
     private final Random random = new Random();
 
     private float[] rotationMatrix = new float[16];
-    private float[] directionVector = new float[4];
-    private float[] resultVector = new float[4];
+    private float[] directionVec = new float[4];
+    private float[] resultVec = new float[4];
 
     private boolean once = true;
 
 
-    public ParticleShooter(float[] position, float[] direction, int color, float angleVarianceInDegrees, float speedVariance) {
+    public ParticleShooter(float[] position, float[] direction, float[] color, float angleVarianceInDegrees, float speedVariance) {
         this.position = position;
         this.direction = direction;
         this.color = color;
         this.angleVariance = angleVarianceInDegrees;
         this.speedVariance = speedVariance;
 
-        directionVector[0] = direction[0];
-        directionVector[1] = direction[1];
-        directionVector[2] = direction[2];
+        directionVec[0] = direction[0];
+        directionVec[1] = direction[1];
+        directionVec[2] = direction[2];
 
-        //directionVector[0] = random.nextInt(1);
-        //directionVector[1] = random.nextInt(1);
-       // directionVector[2] = random.nextInt(1);
+        //directionVec[0] = random.nextInt(1);
+        //directionVec[1] = random.nextInt(1);
+       // directionVec[2] = random.nextInt(1);
     }
 
     public void addParticles(ParticleSystem particleSystem, float currentTime, int count) {
@@ -55,15 +53,11 @@ public class ParticleShooter extends transformController{
                     (random.nextFloat() - 0.5f) * angleVariance, (random.nextFloat() - 0.5f) * angleVariance);
 
 
-            multiplyMV(resultVector, 0, rotationMatrix, 0, directionVector, 0);
+            multiplyMV(resultVec, 0, rotationMatrix, 0, directionVec, 0);
 
-            float speedAdjustment = 1f + random.nextFloat() * speedVariance;
+            float speed = 1.0f + random.nextFloat() * speedVariance;
 
-            float[] thisDirection = new float[]{
-                    resultVector[0] * speedAdjustment,
-                    resultVector[1] * speedAdjustment,
-                    resultVector[2] * speedAdjustment};
-
+            float[] thisDirection = new float[]{resultVec[0] * speed, resultVec[1] * speed, resultVec[2] * speed};
 
             particleSystem.addParticle(position, color, thisDirection, currentTime);
         }

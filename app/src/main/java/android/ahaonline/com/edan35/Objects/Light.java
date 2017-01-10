@@ -22,13 +22,13 @@ public class Light extends transformController {
         vertexBuffer = new VertexBuffer(lightCoords);
     }
 
-    static float lightCoords[] = {   // in counterclockwise order:
-            -1.0f,-1.0f,-1.0f, // triangle 1 : begin
-            -1.0f,-1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f, // triangle 1 : end
-            1.0f, 1.0f,-1.0f, // triangle 2 : begin
+    static float lightCoords[] = {
             -1.0f,-1.0f,-1.0f,
-            -1.0f, 1.0f,-1.0f, // triangle 2 : end
+            -1.0f,-1.0f, 1.0f,
+            -1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f,-1.0f,
+            -1.0f,-1.0f,-1.0f,
+            -1.0f, 1.0f,-1.0f,
             1.0f,-1.0f, 1.0f,
             -1.0f,-1.0f,-1.0f,
             1.0f,-1.0f,-1.0f,

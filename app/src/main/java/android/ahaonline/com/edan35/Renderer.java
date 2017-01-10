@@ -21,7 +21,6 @@ import android.content.Context;
 import static android.ahaonline.com.edan35.util.Geometry.*;
 
 import static android.opengl.GLES30.*;
-import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Vibrator;
@@ -129,7 +128,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         particleProgram = new ParticleShaderProgram(context);
         particleSystem = new ParticleSystem(250);
         globalStartTime = System.nanoTime();
-        engine = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees, speedVariance);
+        engine = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, new float[]{255, 50, 5}, angleVarianceInDegrees, speedVariance);
 
         particleSystemExplosions = new ParticleSystem(500);
 
@@ -324,8 +323,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         glDrawBuffers(2, attachments, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
     }
 
     private void respawnAsteroid(Model asteroid) {
@@ -383,7 +380,7 @@ public class Renderer implements GLSurfaceView.Renderer {
                     explosionPoints = new ArrayList<>();
                     float angleVarianceInDegrees2 = 180f;
                     float speedVariance2 = randomNumber(15.0f, 25.0f);
-                    explosions.add(new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, Color.rgb(255, 50, 5), angleVarianceInDegrees2, speedVariance2));
+                    explosions.add(new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, new float[]{255, 50, 5}, angleVarianceInDegrees2, speedVariance2));
                     explosionPoints.add(new Point(asteroid.getX(), asteroid.getY(), asteroid.getZ()));
                     respawnAsteroid(asteroid);
                 }
@@ -434,7 +431,6 @@ public class Renderer implements GLSurfaceView.Renderer {
                 if(tempExplosion.once()) {
                     tempExplosion.addParticles(particleSystemExplosions, currentTime, 500);
                 }
-
 
                 particleProgram.useProgram();
                 particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
@@ -527,7 +523,6 @@ public class Renderer implements GLSurfaceView.Renderer {
             spaceship.transformMatrix();
             setIdentityM(modelMatrixForFire, 0);
             translateM(modelMatrixForFire, 0, spaceship.getX(), spaceship.getY() - 0.1f, -1);
-
         }
     }
 
@@ -553,8 +548,6 @@ public class Renderer implements GLSurfaceView.Renderer {
                 laser.setCoordinates();
         }
     }
-
-
 
     private String getEmojiByUnicode(int unicode){
         return new String(Character.toChars(unicode));
@@ -591,10 +584,5 @@ public class Renderer implements GLSurfaceView.Renderer {
 
         return new Ray(nearPointRay, Geometry.vectorBetween(nearPointRay, farPointRay));
     }
-
-
-
-
-
 
 }

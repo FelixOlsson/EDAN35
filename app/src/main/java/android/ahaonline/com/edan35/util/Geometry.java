@@ -61,7 +61,6 @@ public class Geometry {
     }
 
 
-
     public static class Plane {
         public final Point point;
         public final Vector normal;
