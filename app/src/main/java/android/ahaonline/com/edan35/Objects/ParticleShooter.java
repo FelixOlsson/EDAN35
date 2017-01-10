@@ -57,9 +57,9 @@ public class ParticleShooter extends transformController{
 
             float speed = 1.0f + random.nextFloat() * speedVariance;
 
-            float[] thisDirection = new float[]{resultVec[0] * speed, resultVec[1] * speed, resultVec[2] * speed};
+            float[] newDirection = new float[]{resultVec[0] * speed, resultVec[1] * speed, resultVec[2] * speed};
 
-            particleSystem.addParticle(position, color, thisDirection, currentTime);
+            particleSystem.addParticle(position, color, newDirection, currentTime);
         }
     }
 
