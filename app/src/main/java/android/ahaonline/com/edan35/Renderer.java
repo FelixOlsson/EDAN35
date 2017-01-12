@@ -70,6 +70,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     private SkyBoxShaderProgram skyboxProgram;
     private SkyBox skybox;
     private int skyboxTexture;
+    private int noiseTexture;
     private int life = 3;
 
     private int texture, texture2, texture3;
@@ -126,7 +127,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         final float angleVarianceInDegrees = 25f;
         final float speedVariance = 5f;
         particleProgram = new ParticleShaderProgram(context);
-        particleSystem = new ParticleSystem(250);
+        particleSystem = new ParticleSystem(500);
         globalStartTime = System.nanoTime();
         engine = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, new float[]{255, 50, 5}, angleVarianceInDegrees, speedVariance);
 
@@ -197,6 +198,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         texture = TextureHelper.loadTexture(context, R.drawable.seamlessstonetexture);
         texture2 = TextureHelper.loadTexture(context, R.drawable.container2_specular);
         textureParticle = TextureHelper.loadTexture(context, R.drawable.fire);
+        noiseTexture = TextureHelper.loadTexture(context, R.drawable.noisetex);
 
 
         //Utility
@@ -433,7 +435,7 @@ public class Renderer implements GLSurfaceView.Renderer {
                 }
 
                 particleProgram.useProgram();
-                particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
+                particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle, noiseTexture);
                 particleSystemExplosions.bindData(particleProgram);
                 particleSystemExplosions.draw();
 
@@ -538,6 +540,9 @@ public class Renderer implements GLSurfaceView.Renderer {
         Point p;
         p = Geometry.intersectionRayPlane(ray, plane);
 
+        System.out.println(Geometry.intersectionRayPlane(ray, plane).x + " " + Geometry.intersectionRayPlane(ray, plane).y + " "  + Geometry.intersectionRayPlane(ray, plane).z);
+        System.out.println(Geometry.intersectionRayPlane2(ray, plane).x + " " + Geometry.intersectionRayPlane2(ray, plane).y + " "  + Geometry.intersectionRayPlane2(ray, plane).z);
+
         if(Geometry.intersectionPointSphere(p.x,p.y,spaceship.getX(),spaceship.getY(), 9.0f)) {
                 Model laser = new Model();
                 laser.loadModel(context, R.raw.laser);
@@ -563,7 +568,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         engine.addParticles(particleSystem, currentTime, 10);
 
         particleProgram.useProgram();
-        particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle);
+        particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle, noiseTexture);
         particleSystem.bindData(particleProgram);
         particleSystem.draw();
     }

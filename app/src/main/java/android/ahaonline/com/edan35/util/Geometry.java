@@ -76,13 +76,25 @@ public class Geometry {
     }
 
     public static Point intersectionRayPlane(Ray ray, Plane plane) {
-        Vector rayToPlaneVector = vectorBetween(ray.point, plane.point);
 
-        float scaleFactor = rayToPlaneVector.dotProduct(plane.normal)
+        float t = vectorBetween(ray.point, plane.point).dotProduct(plane.normal)
                 / ray.vector.dotProduct(plane.normal);
 
-        Point intersectionPoint = ray.point.translate(ray.vector.scale(scaleFactor));
+        Point intersectionPoint = ray.point.translate(ray.vector.scale(t));
         return intersectionPoint;
+    }
+
+    public static Point intersectionRayPlane2(Ray ray, Plane plane) {
+        float t = -(plane.normal.dotProduct(new Vector(ray.point.x, ray.point.y, ray.point.z))+
+                distance(vectorBetween(ray.point, plane.point))) / plane.normal.dotProduct(ray.vector);
+
+        return new Point(ray.point.x + ray.vector.scale(t).x, ray.point.y + ray.vector.scale(t).y ,
+                ray.point.z + ray.vector.scale(t).z);
+    }
+
+    private  static float distance(Vector v) {
+        return (float)Math.sqrt(v.x * v.x +
+                v.y * v.y + v.z * v.z);
     }
 
     public static boolean intersectionPointSphere(float x, float y, float spX, float spY, float threshold) {

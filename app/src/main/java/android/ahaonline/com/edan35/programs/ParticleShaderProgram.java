@@ -21,6 +21,7 @@ public class ParticleShaderProgram extends ShaderProgram {
     private final int aDirectionVectorLocation;
     private final int aParticleStartTimeLocation;
     private final int uTextureUnitLocation;
+    private final int uNoiseLocation;
     public ParticleShaderProgram(Context context) {
         super(context, R.raw.particle_vertex_shader,
                 R.raw.particle_fragment_shader);
@@ -29,6 +30,7 @@ public class ParticleShaderProgram extends ShaderProgram {
         uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
         uTimeLocation = glGetUniformLocation(program, U_TIME);
         uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
+        uNoiseLocation = glGetUniformLocation(program, "u_Noise");
 
         // Retrieve attribute locations for the shader program.
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
@@ -41,12 +43,16 @@ public class ParticleShaderProgram extends ShaderProgram {
     /*
     public void setUniforms(float[] matrix, float elapsedTime) {
      */
-    public void setUniforms(float[] matrix, float elapsedTime, int textureId) {
+    public void setUniforms(float[] matrix, float elapsedTime, int textureId, int textureId2) {
         glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
         glUniform1f(uTimeLocation, elapsedTime);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureId);
         glUniform1i(uTextureUnitLocation, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textureId2);
+        glUniform1i(uNoiseLocation, 1);
     }
 
     public int getPositionAttributeLocation() {
