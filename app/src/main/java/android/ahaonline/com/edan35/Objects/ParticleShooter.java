@@ -20,6 +20,8 @@ public class ParticleShooter extends transformController{
 
     private final float angle;
     private final float speed;
+    private  float lifeTime;
+    private  float age;
 
     private final Random random = new Random();
 

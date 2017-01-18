@@ -1,6 +1,6 @@
 package android.ahaonline.com.edan35.programs;
 
-import android.ahaonline.com.edan35.Objects.Light;
+
 import android.ahaonline.com.edan35.Objects.Model;
 import android.ahaonline.com.edan35.R;
 import android.ahaonline.com.edan35.util.Camera;

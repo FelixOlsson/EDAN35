@@ -10,7 +10,7 @@ void main()
 {
 
        const float gamma = 2.2;
-       const float exposure = 0.3;
+       const float exposure = 0.7;
        vec3 hdrColor = texture2D(screenTexture, TexCoords).rgb;
        vec3 bloomColor = fiveTimesFiveBlurEffect();
        hdrColor += bloomColor;
@@ -22,7 +22,7 @@ void main()
 
 vec3 fiveTimesFiveBlurEffect()
 {
-    float offset = 1.0 / 70.0;
+    float offset = 1.0 / 200.0;
     vec2 offsets[] = vec2[25](
                     // First row
                     vec2(-offset, offset),
