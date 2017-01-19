@@ -70,6 +70,7 @@ public class ParticleShooter extends transformController{
             float[] newPosition = new float[]{translationMatrix[13], translationMatrix[14], translationMatrix[15]};
 
             particleSystem.addParticle(newPosition, color, newDirection, currentTime);
+            // comment
         }
     }
 
