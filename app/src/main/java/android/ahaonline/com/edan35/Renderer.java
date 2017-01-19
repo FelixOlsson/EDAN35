@@ -507,7 +507,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
 
         float[] nearPointNdc = {normalizedX, normalizedY, -1.0f, 1};
-        float[] farPointNdc =  {normalizedX, normalizedY,  1.0f, 1};
+        float[] farPointNdc =  {normalizedX, normalizedY,  1, 1};
 
         float[] nearPointFrustum = new float[4];
         float[] farPointFrustum = new float[4];
@@ -551,7 +551,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     public void handleTouchPress(float normalizedX, float normalizedY) {
 
         float[] nearPointNdc = {normalizedX, normalizedY, -1.0f, 1};
-        float[] farPointNdc =  {normalizedX, normalizedY,  1.0f, 1};
+        float[] farPointNdc =  {normalizedX, normalizedY,  100, 1};
 
         float[] nearPointFrustum = new float[4];
         float[] farPointFrustum = new float[4];
