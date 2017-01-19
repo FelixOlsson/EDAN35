@@ -46,8 +46,7 @@ public class VertexBuffer {
                                        int componentCount, int stride) {
         glBindBuffer(GL_ARRAY_BUFFER, bufferId);
 
-        glVertexAttribPointer(attributeLocation, componentCount, GL_FLOAT,
-                false, stride, dataOffset);
+        glVertexAttribPointer(attributeLocation, componentCount, GL_FLOAT, false, stride, dataOffset);
         glEnableVertexAttribArray(attributeLocation);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);

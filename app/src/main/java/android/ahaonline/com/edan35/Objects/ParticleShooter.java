@@ -6,6 +6,8 @@ package android.ahaonline.com.edan35.Objects;
 
 
 
+import android.opengl.Matrix;
+
 import java.util.Random;
 import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.rotateM;
@@ -26,8 +28,10 @@ public class ParticleShooter extends transformController{
     private final Random random = new Random();
 
     private float[] rotationMatrix = new float[16];
+    private float[] translationMatrix = new float[16];
     private float[] directionVec = new float[4];
     private float[] resultVec = new float[4];
+    private float[] resultVec2 = new float[4];
 
     private boolean once = true;
 
@@ -55,15 +59,17 @@ public class ParticleShooter extends transformController{
             setRotateM(rotationMatrix, 0, (random.nextFloat() - 0.5f) * angle, 1, 0, 0);
             rotateM(rotationMatrix, 0, (random.nextFloat() - 0.5f) * angle, 0, 1, 0);
             rotateM(rotationMatrix, 0, (random.nextFloat() - 0.5f) * angle, 0, 0, 1);
-
+            Matrix.setIdentityM(translationMatrix, 0);
+            Matrix.translateM(translationMatrix, 0, random.nextFloat() * 10f, random.nextFloat()* 10f, random.nextFloat() * 10f);
 
             multiplyMV(resultVec, 0, rotationMatrix, 0, directionVec, 0);
 
             float randomSpeed = 1.0f + random.nextFloat() * speed;
 
             float[] newDirection = new float[]{resultVec[0] * randomSpeed, resultVec[1] * randomSpeed, resultVec[2] * randomSpeed};
+            float[] newPosition = new float[]{translationMatrix[13], translationMatrix[14], translationMatrix[15]};
 
-            particleSystem.addParticle(position, color, newDirection, currentTime);
+            particleSystem.addParticle(newPosition, color, newDirection, currentTime);
         }
     }
 
