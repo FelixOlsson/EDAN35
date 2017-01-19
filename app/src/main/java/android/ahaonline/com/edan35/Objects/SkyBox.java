@@ -35,19 +35,14 @@ public class SkyBox {
                 .put(new byte[] {
                         1, 3, 0,
                         0, 3, 2,
-
                         4, 6, 5,
                         5, 6, 7,
-
                         0, 2, 4,
                         4, 2, 6,
-
                         5, 7, 1,
                         1, 7, 3,
-
                         5, 1, 4,
                         4, 1, 0,
-
                         6, 2, 7,
                         7, 2, 3
                 });
@@ -55,9 +50,7 @@ public class SkyBox {
     }
     public void bindData(SkyBoxShaderProgram skyboxProgram) {
         this.shader = skyboxProgram;
-        vertexArray.setVertAttrib(0,
-                skyboxProgram.getPositionAttributeLocation(),
-                POSITION_COMPONENT_COUNT, 0);
+        vertexArray.setVertAttrib(0, skyboxProgram.getPositionAttributeLocation(), POSITION_COMPONENT_COUNT, 0);
     }
 
     public void draw() {

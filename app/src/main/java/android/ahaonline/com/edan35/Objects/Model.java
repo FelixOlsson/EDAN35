@@ -161,33 +161,27 @@ public class Model extends transformController {
 
     public void bindShader(TextureShaderProgram shaderTestProgram) {
         this.shaderTex = shaderTestProgram;
-        vertexBuffer.setVertAttrib(shaderTestProgram.getPositionAttributeLocation(), 3, 0, 0
-        );
+        vertexBuffer.setVertAttrib(shaderTestProgram.getPositionAttributeLocation(), 3, 0, 0);
 
-        vertexBufferCoords.setVertAttrib(shaderTestProgram.getTextureCoordinatesAttributeLocation(), 2, 0, 0
-        );
+        vertexBufferCoords.setVertAttrib(shaderTestProgram.getTextureCoordinatesAttributeLocation(), 2, 0, 0);
 
-        vertexBufferNormals.setVertAttrib(shaderTestProgram.getNormalAttributeLocation(), 3, 0, 0
-        );
+        vertexBufferNormals.setVertAttrib(shaderTestProgram.getNormalAttributeLocation(), 3, 0, 0);
 
 
     }
 
     public void bindShader(ShaderLightProgram shaderLightProgram) {
         this.shaderLight = shaderLightProgram;
-        vertexBuffer.setVertAttrib(shaderLightProgram.getPositionAttributeLocation(), 3, 0, 0
-        );
+        vertexBuffer.setVertAttrib(shaderLightProgram.getPositionAttributeLocation(), 3, 0, 0);
 
 
     }
 
     public void bindShader(ShaderTestProgram shaderLightProgram) {
         this.shaderTestProgram = shaderLightProgram;
-        vertexBuffer.setVertAttrib(shaderTestProgram.getPositionAttributeLocation(), 3, 0, 0
-        );
+        vertexBuffer.setVertAttrib(shaderTestProgram.getPositionAttributeLocation(), 3, 0, 0);
 
-        vertexBufferCoords.setVertAttrib(shaderTestProgram.getTextureCoordinatesAttributeLocation(), 2, 0, 0
-        );
+        vertexBufferCoords.setVertAttrib(shaderTestProgram.getTextureCoordinatesAttributeLocation(), 2, 0, 0);
 
 
     }

@@ -24,8 +24,7 @@ public class ParticleShaderProgram extends ShaderProgram {
     private final int uNoiseLocation;
 
     public ParticleShaderProgram(Context context) {
-        super(context, R.raw.particle_vertex_shader,
-                R.raw.particle_fragment_shader);
+        super(context, R.raw.particle_vertex_shader, R.raw.particle_fragment_shader);
 
         // Uniforms
         uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
@@ -40,9 +39,6 @@ public class ParticleShaderProgram extends ShaderProgram {
         aParticleStartTimeLocation = glGetAttribLocation(program, A_PARTICLE_START_TIME);
     }
 
-    /*
-    public void setUniforms(float[] matrix, float elapsedTime) {
-     */
     public void setUniforms(float[] matrix, float elapsedTime, int textureId, int textureId2) {
         glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
         glUniform1f(uTimeLocation, elapsedTime);

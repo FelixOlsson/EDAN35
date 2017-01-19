@@ -1,8 +1,5 @@
 package android.ahaonline.com.edan35.programs;
 
-/**
- * Created by Felix on 2016-12-10.
- */
 
 import android.ahaonline.com.edan35.R;
 import android.content.Context;
@@ -27,8 +24,7 @@ public class FrameShaderProgram extends ShaderProgram {
 
     public FrameShaderProgram(Context context) {
 
-        super(context, R.raw.frame_vertex_shader,
-                R.raw.frame_fragment_shader);
+        super(context, R.raw.frame_vertex_shader, R.raw.frame_fragment_shader);
 
         //Uniforms
         uTextureLocation = glGetUniformLocation(program, "screenTexture");

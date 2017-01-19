@@ -27,8 +27,7 @@ public class ShaderBlur extends ShaderProgram {
 
     public ShaderBlur(Context context) {
 
-        super(context, R.raw.guassian_vertex_shader,
-                R.raw.guassian_fragment_shader);
+        super(context, R.raw.guassian_vertex_shader, R.raw.guassian_fragment_shader);
 
         //Uniforms
         uHorizontalLocation = glGetUniformLocation(program, "horizontal");
