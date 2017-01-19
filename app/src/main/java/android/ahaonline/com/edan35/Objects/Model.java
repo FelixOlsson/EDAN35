@@ -6,8 +6,6 @@ import android.ahaonline.com.edan35.programs.ShaderTestProgram;
 import android.ahaonline.com.edan35.programs.TextureShaderProgram;
 import android.content.Context;
 
-import static android.R.interpolator.linear;
-import static android.ahaonline.com.edan35.R.raw.light;
 import static android.opengl.GLES30.*;
 
 import java.io.BufferedReader;
@@ -163,39 +161,33 @@ public class Model extends transformController {
 
     public void bindShader(TextureShaderProgram shaderTestProgram) {
         this.shaderTex = shaderTestProgram;
-        vertexBuffer.setVertexAttribPointer(0,
-                shaderTestProgram.getPositionAttributeLocation(),
-                3, 0);
+        vertexBuffer.setVertAttrib(shaderTestProgram.getPositionAttributeLocation(), 3, 0, 0
+        );
 
-        vertexBufferCoords.setVertexAttribPointer(0,
-                shaderTestProgram.getTextureCoordinatesAttributeLocation(),
-                2, 0);
+        vertexBufferCoords.setVertAttrib(shaderTestProgram.getTextureCoordinatesAttributeLocation(), 2, 0, 0
+        );
 
-        vertexBufferNormals.setVertexAttribPointer(0,
-                shaderTestProgram.getNormalAttributeLocation(),
-                3, 0);
+        vertexBufferNormals.setVertAttrib(shaderTestProgram.getNormalAttributeLocation(), 3, 0, 0
+        );
 
 
     }
 
     public void bindShader(ShaderLightProgram shaderLightProgram) {
         this.shaderLight = shaderLightProgram;
-        vertexBuffer.setVertexAttribPointer(0,
-                shaderLightProgram.getPositionAttributeLocation(),
-                3, 0);
+        vertexBuffer.setVertAttrib(shaderLightProgram.getPositionAttributeLocation(), 3, 0, 0
+        );
 
 
     }
 
     public void bindShader(ShaderTestProgram shaderLightProgram) {
         this.shaderTestProgram = shaderLightProgram;
-        vertexBuffer.setVertexAttribPointer(0,
-                shaderTestProgram.getPositionAttributeLocation(),
-                3, 0);
+        vertexBuffer.setVertAttrib(shaderTestProgram.getPositionAttributeLocation(), 3, 0, 0
+        );
 
-        vertexBufferCoords.setVertexAttribPointer(0,
-                shaderTestProgram.getTextureCoordinatesAttributeLocation(),
-                2, 0);
+        vertexBufferCoords.setVertAttrib(shaderTestProgram.getTextureCoordinatesAttributeLocation(), 2, 0, 0
+        );
 
 
     }

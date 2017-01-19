@@ -7,7 +7,6 @@ package android.ahaonline.com.edan35.Objects;
 import android.ahaonline.com.edan35.data.VertexBuffer;
 import android.ahaonline.com.edan35.programs.FrameShaderProgram;
 import android.ahaonline.com.edan35.programs.ShaderBlur;
-import android.ahaonline.com.edan35.programs.ShaderProgram;
 
 import static android.opengl.GLES30.*;
 
@@ -51,22 +50,18 @@ public class ScreenOverlay  {
 
     public void bindShader(FrameShaderProgram shaderLightProgram) {
         this.fshader = shaderLightProgram;
-        vertexBuffer.setVertexAttribPointer(0,
-                shaderLightProgram.getPositionAttributeLocation(),
-                2, 0);
-        vertexBuffer.setVertexAttribPointer(0,
-                shaderLightProgram.getTextureAttributeLocation(),
-                2, 0);
+        vertexBuffer.setVertAttrib(shaderLightProgram.getPositionAttributeLocation(), 2, 0, 0
+        );
+        vertexBuffer.setVertAttrib(shaderLightProgram.getTextureAttributeLocation(), 2, 0, 0
+        );
     }
 
     public void bindShader(ShaderBlur shaderLightProgram) {
         this.bshader = shaderLightProgram;
-        vertexBuffer.setVertexAttribPointer(0,
-                shaderLightProgram.getPositionAttributeLocation(),
-                2, 0);
-        vertexBuffer.setVertexAttribPointer(0,
-                shaderLightProgram.getTextureAttributeLocation(),
-                2, 0);
+        vertexBuffer.setVertAttrib(shaderLightProgram.getPositionAttributeLocation(), 2, 0, 0
+        );
+        vertexBuffer.setVertAttrib(shaderLightProgram.getTextureAttributeLocation(), 2, 0, 0
+        );
     }
 
     public void draw() {

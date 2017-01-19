@@ -2,7 +2,7 @@ package android.ahaonline.com.edan35;
 
 import android.ahaonline.com.edan35.Objects.Light;
 import android.ahaonline.com.edan35.Objects.Model;
-import android.ahaonline.com.edan35.Objects.ParticleShooter;
+import android.ahaonline.com.edan35.Objects.ParticleSpawner;
 import android.ahaonline.com.edan35.Objects.ParticleSystem;
 import android.ahaonline.com.edan35.Objects.ScreenOverlay;
 import android.ahaonline.com.edan35.Objects.SkyBox;
@@ -97,9 +97,9 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private ParticleShaderProgram particleProgram;
     private ParticleSystem particleSystem;
-    private ParticleShooter engine;
+    private ParticleSpawner engine;
     private ParticleSystem particleSystemExplosions;
-    private ArrayList<ParticleShooter> explosions = new ArrayList<>();
+    private ArrayList<ParticleSpawner> explosions = new ArrayList<>();
     private ArrayList<Vec3> explosionPoints = new ArrayList<>();
     private ArrayList<Vec3> laserPoints = new ArrayList<>();
 
@@ -129,7 +129,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         particleProgram = new ParticleShaderProgram(context);
         particleSystem = new ParticleSystem(500);
         globalStartTime = System.nanoTime();
-        engine = new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, new float[]{255, 50, 5}, angleVarianceInDegrees, speedVariance);
+        engine = new ParticleSpawner(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, new float[]{255, 50, 5}, angleVarianceInDegrees, speedVariance);
 
         particleSystemExplosions = new ParticleSystem(500);
 
@@ -382,7 +382,7 @@ public class Renderer implements GLSurfaceView.Renderer {
                     explosionPoints = new ArrayList<>();
                     float angleVarianceInDegrees2 = 180f;
                     float speedVariance2 = randomNumber(15.0f, 25.0f);
-                    explosions.add(new ParticleShooter(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, new float[]{255, 50, 5}, angleVarianceInDegrees2, speedVariance2));
+                    explosions.add(new ParticleSpawner(new float[]{0f, 0f, 0f}, new float[]{0f, 0f, -0.5f}, new float[]{255, 50, 5}, angleVarianceInDegrees2, speedVariance2));
                     explosionPoints.add(new Vec3(asteroid.getX(), asteroid.getY(), asteroid.getZ()));
                     respawnAsteroid(asteroid);
                 }
@@ -411,13 +411,13 @@ public class Renderer implements GLSurfaceView.Renderer {
     }
 
     private void drawExplosion() {
-        Iterator<ParticleShooter> explosion = explosions.iterator();
+        Iterator<ParticleSpawner> explosion = explosions.iterator();
         Iterator<Vec3> points = explosionPoints.iterator();
 
         while(explosion.hasNext() && points.hasNext()) {
 
             float currentTime = (System.nanoTime() - globalStartTime) / 1000000000f;
-            ParticleShooter tempExplosion = explosion.next();
+            ParticleSpawner tempExplosion = explosion.next();
             Vec3 tempPoint = points.next();
             if( tempPoint != null) {
                 float [] modelMatrixForExplosion = new float[16];
@@ -431,7 +431,7 @@ public class Renderer implements GLSurfaceView.Renderer {
                         camera.getViewMatrix(), 0);
 
                 if(tempExplosion.once()) {
-                    tempExplosion.addParticles(particleSystemExplosions, currentTime, 500);
+                    tempExplosion.spawnParticles(particleSystemExplosions, currentTime, 500);
                 }
 
                 particleProgram.useProgram();
@@ -590,7 +590,7 @@ public class Renderer implements GLSurfaceView.Renderer {
                 camera.getViewMatrix(), 0);
 
         float currentTime = (System.nanoTime() - globalStartTime) / 1000000000f;
-        engine.addParticles(particleSystem, currentTime, 10);
+        engine.spawnParticles(particleSystem, currentTime, 10);
 
         particleProgram.useProgram();
         particleProgram.setUniforms(modelViewProjectionMatrix, currentTime, textureParticle, noiseTexture);

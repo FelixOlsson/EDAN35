@@ -23,11 +23,10 @@ public class VertexBuffer {
         glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 
 
-        FloatBuffer vertexArray = ByteBuffer
-                .allocateDirect(vertexData.length * BYTES_PER_FLOAT)
+        FloatBuffer vertexArray = ByteBuffer.allocateDirect(vertexData.length * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
-                .asFloatBuffer()
-                .put(vertexData);
+                .asFloatBuffer();
+        vertexArray.put(vertexData);
         vertexArray.position(0);
 
         glBufferData(GL_ARRAY_BUFFER, vertexArray.capacity() * BYTES_PER_FLOAT,
@@ -37,17 +36,16 @@ public class VertexBuffer {
     }
 
     /**
-     * @param dataOffset
-     * @param attributeLocation
-     * @param componentCount
+     * @param location
+     * @param count
      * @param stride
+     * @param offset
      */
-    public void setVertexAttribPointer(int dataOffset, int attributeLocation,
-                                       int componentCount, int stride) {
+    public void setVertAttrib(int location, int count, int stride, int offset) {
         glBindBuffer(GL_ARRAY_BUFFER, bufferId);
 
-        glVertexAttribPointer(attributeLocation, componentCount, GL_FLOAT, false, stride, dataOffset);
-        glEnableVertexAttribArray(attributeLocation);
+        glVertexAttribPointer(location, count, GL_FLOAT, false, stride, offset);
+        glEnableVertexAttribArray(location);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }

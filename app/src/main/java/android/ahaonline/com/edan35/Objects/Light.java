@@ -64,9 +64,8 @@ public class Light extends transformController {
 
     public void bindShader(ShaderLightProgram shaderLightProgram) {
         this.shader = shaderLightProgram;
-        vertexBuffer.setVertexAttribPointer(0,
-                shaderLightProgram.getPositionAttributeLocation(),
-                COORDS_PER_VERTEX, 0);
+        vertexBuffer.setVertAttrib(shaderLightProgram.getPositionAttributeLocation(), COORDS_PER_VERTEX, 0, 0
+        );
     }
 
     public void draw() {

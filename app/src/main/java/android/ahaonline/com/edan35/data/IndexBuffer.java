@@ -22,11 +22,10 @@ public class IndexBuffer {
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
 
-        ShortBuffer indexArray = ByteBuffer
-                .allocateDirect(indexData.length * Constants.BYTES_PER_SHORT)
+        ShortBuffer indexArray = ByteBuffer.allocateDirect(indexData.length * Constants.BYTES_PER_SHORT)
                 .order(ByteOrder.nativeOrder())
-                .asShortBuffer()
-                .put(indexData);
+                .asShortBuffer();
+        indexArray.put(indexData);
         indexArray.position(0);
 
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray.capacity()

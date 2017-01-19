@@ -1,20 +1,24 @@
+#version 300 es
+
 uniform mat4 u_Matrix;
 uniform float u_Time;
 uniform sampler2D u_Noise;
 
-attribute vec3 a_Position;
-attribute vec3 a_Color;
-attribute vec3 a_DirectionVector;
-attribute float a_ParticleStartTime;
+in vec3 a_Position;
+in vec3 a_Color;
+in vec3 a_DirectionVector;
+in float a_ParticleStartTime;
 
-varying vec3 v_Color;
-varying float v_ElapsedTime;
+out vec3 v_Color;
+out float v_ElapsedTime;
 
 void main()
 {
     v_Color = a_Color;
     v_ElapsedTime = u_Time - a_ParticleStartTime;
-    vec3 currentPosition = a_Position + (a_DirectionVector * v_ElapsedTime);
-    gl_Position = u_Matrix * vec4(currentPosition, 1.0);
+    vec3 currentPos = a_Position + (a_DirectionVector * v_ElapsedTime);
+
     gl_PointSize = 10.0;
+    gl_Position = u_Matrix * vec4(currentPos, 1.0);
+
 }

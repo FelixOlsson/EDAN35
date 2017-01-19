@@ -22,22 +22,22 @@ public class ParticleShaderProgram extends ShaderProgram {
     private final int aParticleStartTimeLocation;
     private final int uTextureUnitLocation;
     private final int uNoiseLocation;
+
     public ParticleShaderProgram(Context context) {
         super(context, R.raw.particle_vertex_shader,
                 R.raw.particle_fragment_shader);
 
-        // Retrieve uniform locations for the shader program.
+        // Uniforms
         uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
         uTimeLocation = glGetUniformLocation(program, U_TIME);
         uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
         uNoiseLocation = glGetUniformLocation(program, "u_Noise");
 
-        // Retrieve attribute locations for the shader program.
+        // Attributes
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
         aColorLocation = glGetAttribLocation(program, A_COLOR);
         aDirectionVectorLocation = glGetAttribLocation(program, A_DIRECTION_VECTOR);
-        aParticleStartTimeLocation =
-                glGetAttribLocation(program, A_PARTICLE_START_TIME);
+        aParticleStartTimeLocation = glGetAttribLocation(program, A_PARTICLE_START_TIME);
     }
 
     /*

@@ -55,7 +55,7 @@ public class SkyBox {
     }
     public void bindData(SkyBoxShaderProgram skyboxProgram) {
         this.shader = skyboxProgram;
-        vertexArray.setVertexAttribPointer(0,
+        vertexArray.setVertAttrib(0,
                 skyboxProgram.getPositionAttributeLocation(),
                 POSITION_COMPONENT_COUNT, 0);
     }

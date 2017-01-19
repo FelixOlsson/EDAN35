@@ -2,12 +2,9 @@ package android.ahaonline.com.edan35.Objects;
 
 import android.ahaonline.com.edan35.data.VertexArray;
 import android.ahaonline.com.edan35.programs.ParticleShaderProgram;
-import android.graphics.Color;
 
 
 import static android.opengl.GLES30.*;
-
-import static android.ahaonline.com.edan35.util.Constants.BYTES_PER_FLOAT;
 
 /**
  * Created by Felix on 2016-12-13.
@@ -44,7 +41,7 @@ public class ParticleSystem  extends transformController{
         this.maxParticleCount = maxParticleCount;
     }
 
-    public void addParticle(float[] position, float[] color, float[] direction, float particleStartTime) {
+    public void spawnParticle(float[] position, float[] color, float[] direction, float particleStartTime) {
 
         final int posNumber = nextParticle * 3;
         final int colNumber = nextParticle * 3;
@@ -88,20 +85,20 @@ public class ParticleSystem  extends transformController{
 
 
         this.particleShaderProgram = particleProgram;
-        posArray.setVertexAttribPointer(0,
+        posArray.setVertAttrib(0,
                 particleProgram.getPositionAttributeLocation(),
                 3, 0);
 
-        colorArray.setVertexAttribPointer(0,
+        colorArray.setVertAttrib(0,
                 particleProgram.getColorAttributeLocation(),
                 3, 0);
 
-        vectArray.setVertexAttribPointer(0,
+        vectArray.setVertAttrib(0,
                 particleProgram.getDirectionVectorAttributeLocation(),
                 3, 0);
 
 
-        timeArray.setVertexAttribPointer(0,
+        timeArray.setVertAttrib(0,
                 particleProgram.getParticleStartTimeAttributeLocation(),
                 1, 0);
     }
