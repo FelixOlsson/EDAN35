@@ -1,2 +1,2 @@
 **Game androdid opengl es**
-![alt text](https://github.com/FelixOlsson/EDAN35/master/header.jpg "Logo Title Text 1")
+![Image of Yaktocat](https://felixolsson.github.com/EDAN35/header.jpg)
